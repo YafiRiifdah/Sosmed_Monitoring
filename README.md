@@ -104,7 +104,7 @@ cp .env.example .env
 Isi environment:
 
 ```env
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres?sslmode=require"
+DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require&connection_limit=1"
 REDIS_HOST=localhost
 REDIS_PORT=6379
 PORT=4000
@@ -122,6 +122,7 @@ SCHEDULER_SCORING_CRON_MS=600000
 3. Copy connection string PostgreSQL.
 4. Masukkan ke `.env` sebagai `DATABASE_URL`.
 5. Pastikan connection string menggunakan SSL, misalnya `sslmode=require`.
+6. Untuk Supabase session pooler, tambahkan `connection_limit=1` supaya backend, worker, dan scheduler tidak cepat memenuhi batas koneksi free/shared pooler.
 
 ## Install Dependency
 
