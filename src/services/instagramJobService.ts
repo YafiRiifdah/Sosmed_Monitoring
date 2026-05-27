@@ -1,0 +1,112 @@
+import { EngagementType, ScrapeJobStatus } from "@prisma/client";
+import { prisma } from "../database/prisma.js";
+import { InstagramScraper } from "../scraping/InstagramScraper.js";
+import { scoringService } from "./scoringService.js";
+
+export const instagramJobService = {
+  async discoverInstagramPosts(targetAccountId?: string) {
+    const targets = await prisma.targetAccount.findMany({
+      where: { isActive: true, ...(targetAccountId ? { id: targetAccountId } : {}) }
+    });
+
+    const scraper = new InstagramScraper();
+    try {
+      await scraper.loadSession();
+      for (const target of targets) {
+        const posts = await scraper.discoverPosts(target.username);
+        for (const post of posts) {
+          await prisma.instagramPost.upsert({
+            where: { instagramPostId: post.instagramPostId },
+            update: {
+              postUrl: post.postUrl,
+              caption: post.caption,
+              postedAt: post.postedAt
+            },
+            create: {
+              targetAccountId: target.id,
+              instagramPostId: post.instagramPostId,
+              postUrl: post.postUrl,
+              caption: post.caption,
+              postedAt: post.postedAt
+            }
+          });
+        }
+      }
+    } finally {
+      await scraper.close();
+    }
+  },
+
+  async fetchPostEngagement(postId?: string) {
+    const posts = await prisma.instagramPost.findMany({
+      where: postId ? { id: postId } : undefined
+    });
+
+    const scraper = new InstagramScraper();
+    try {
+      await scraper.loadSession();
+      for (const post of posts) {
+        const [likes, comments] = await Promise.all([
+          scraper.fetchLikes(post.postUrl),
+          scraper.fetchComments(post.postUrl)
+        ]);
+
+        for (const username of likes) {
+          await prisma.engagement.upsert({
+            where: {
+              postId_username_engagementType_commentText: {
+                postId: post.id,
+                username: username.toLowerCase(),
+                engagementType: EngagementType.LIKE,
+                commentText: ""
+              }
+            },
+            update: { detectedAt: new Date() },
+            create: {
+              postId: post.id,
+              username: username.toLowerCase(),
+              engagementType: EngagementType.LIKE,
+              commentText: ""
+            }
+          });
+        }
+
+        for (const comment of comments) {
+          await prisma.engagement.create({
+            data: {
+              postId: post.id,
+              username: comment.username.toLowerCase(),
+              engagementType: EngagementType.COMMENT,
+              commentText: comment.commentText
+            }
+          });
+        }
+
+        await scoringService.recalculatePostStatus(post.id);
+      }
+    } finally {
+      await scraper.close();
+    }
+  },
+
+  async markScrapeJobRunning(scrapeJobId?: string) {
+    if (!scrapeJobId) return;
+    await prisma.scrapeJob.update({ where: { id: scrapeJobId }, data: { status: ScrapeJobStatus.RUNNING } });
+  },
+
+  async markScrapeJobCompleted(scrapeJobId?: string) {
+    if (!scrapeJobId) return;
+    await prisma.scrapeJob.update({ where: { id: scrapeJobId }, data: { status: ScrapeJobStatus.COMPLETED } });
+  },
+
+  async markScrapeJobFailed(scrapeJobId: string | undefined, error: unknown) {
+    if (!scrapeJobId) return;
+    await prisma.scrapeJob.update({
+      where: { id: scrapeJobId },
+      data: {
+        status: ScrapeJobStatus.FAILED,
+        errorMessage: error instanceof Error ? error.message : "Unknown worker error"
+      }
+    });
+  }
+};

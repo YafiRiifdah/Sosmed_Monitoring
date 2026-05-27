@@ -1,0 +1,57 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
+  backend:
+    build:
+      context: .
+    env_file:
+      - ./.env
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PORT: 4000
+      INSTAGRAM_STORAGE_STATE: /app/session/storage_state.json
+    ports:
+      - "4000:4000"
+    depends_on:
+      - redis
+    volumes:
+      - ./session:/app/session:ro
+
+  worker:
+    build:
+      context: .
+    env_file:
+      - ./.env
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      INSTAGRAM_STORAGE_STATE: /app/session/storage_state.json
+    command: ["node", "dist/workers/index.js"]
+    depends_on:
+      - redis
+      - backend
+    volumes:
+      - ./session:/app/session:ro
+
+  scheduler:
+    build:
+      context: .
+    env_file:
+      - ./.env
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    command: ["node", "dist/scheduler/index.js"]
+    depends_on:
+      - redis
+      - backend
+
+volumes:
+  redis-data:

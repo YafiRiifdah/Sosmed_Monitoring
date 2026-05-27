@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.local
+storage_state.json
+session/storage_state.json
+*.log
+npm-debug.log*

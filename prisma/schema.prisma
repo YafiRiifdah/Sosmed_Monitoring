@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EngagementType {
+  LIKE
+  COMMENT
+}
+
+enum PostStatus {
+  COMPLETE
+  LIKE_ONLY
+  COMMENT_ONLY
+  MISSING
+}
+
+enum ScrapeJobType {
+  POST_DISCOVERY
+  ENGAGEMENT_FETCH
+  SCORING
+}
+
+enum ScrapeJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model MonitoredAccount {
+  id        String              @id @default(uuid())
+  username  String              @unique
+  displayName String?           @map("display_name")
+  isActive  Boolean             @default(true) @map("is_active")
+  createdAt DateTime            @default(now()) @map("created_at")
+  statuses  AccountPostStatus[]
+
+  @@map("monitored_accounts")
+}
+
+model TargetAccount {
+  id        String          @id @default(uuid())
+  username  String          @unique
+  displayName String?       @map("display_name")
+  isActive  Boolean         @default(true) @map("is_active")
+  createdAt DateTime        @default(now()) @map("created_at")
+  posts     InstagramPost[]
+
+  @@map("target_accounts")
+}
+
+model InstagramPost {
+  id              String              @id @default(uuid())
+  targetAccountId String              @map("target_account_id")
+  instagramPostId String              @unique @map("instagram_post_id")
+  postUrl         String              @map("post_url")
+  caption         String?
+  postedAt        DateTime?           @map("posted_at")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  targetAccount   TargetAccount       @relation(fields: [targetAccountId], references: [id], onDelete: Cascade)
+  engagements     Engagement[]
+  statuses        AccountPostStatus[]
+
+  @@index([targetAccountId])
+  @@map("instagram_posts")
+}
+
+model Engagement {
+  id             String         @id @default(uuid())
+  postId         String         @map("post_id")
+  username       String
+  engagementType EngagementType @map("engagement_type")
+  commentText    String?        @map("comment_text")
+  detectedAt     DateTime       @default(now()) @map("detected_at")
+  post           InstagramPost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, username, engagementType, commentText])
+  @@index([postId, username])
+  @@map("engagements")
+}
+
+model AccountPostStatus {
+  id                 String           @id @default(uuid())
+  postId             String           @map("post_id")
+  monitoredAccountId String           @map("monitored_account_id")
+  hasLiked           Boolean          @default(false) @map("has_liked")
+  hasCommented       Boolean          @default(false) @map("has_commented")
+  likeScore          Int              @default(0) @map("like_score")
+  commentScore       Int              @default(0) @map("comment_score")
+  totalScore         Int              @default(0) @map("total_score")
+  status             PostStatus       @default(MISSING)
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  post               InstagramPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  monitoredAccount   MonitoredAccount @relation(fields: [monitoredAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, monitoredAccountId])
+  @@index([monitoredAccountId])
+  @@map("account_post_status")
+}
+
+model ScrapeJob {
+  id           String          @id @default(uuid())
+  jobType      ScrapeJobType   @map("job_type")
+  status       ScrapeJobStatus @default(QUEUED)
+  errorMessage String?         @map("error_message")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  @@map("scrape_jobs")
+}
