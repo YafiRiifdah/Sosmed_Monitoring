@@ -1,0 +1,54 @@
+export type Account = {
+  id: string;
+  username: string;
+  displayName?: string | null;
+  isActive: boolean;
+  createdAt: string;
+};
+
+export type Overview = {
+  totalTargetAccounts: number;
+  totalPosts: number;
+  totalMonitoredAccounts: number;
+  totalCompletedEngagement: number;
+  totalIncompleteEngagement: number;
+  completionPercentage: number;
+};
+
+export type PostSummary = {
+  id: string;
+  instagramPostId: string;
+  postUrl: string;
+  caption?: string | null;
+  postedAt?: string | null;
+  targetAccount: Account;
+  engagementPercentage: number;
+};
+
+export type PostStatus = "COMPLETE" | "LIKE_ONLY" | "COMMENT_ONLY" | "MISSING";
+
+export type PostStatusRow = {
+  id: string;
+  username: string;
+  displayName?: string | null;
+  liked: boolean;
+  commented: boolean;
+  score: number;
+  status: PostStatus;
+  updatedAt: string;
+};
+
+export type PostDetail = {
+  post: PostSummary;
+  statuses: PostStatusRow[];
+};
+
+export type RankingRow = {
+  id: string;
+  username: string;
+  displayName?: string | null;
+  totalLikes: number;
+  totalComments: number;
+  totalScore: number;
+  completionPercentage: number;
+};

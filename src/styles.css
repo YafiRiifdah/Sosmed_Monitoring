@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  color: #17202a;
+  background: #f5f7fa;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+.status-complete {
+  @apply bg-teal-50 text-teal-700 border-teal-200;
+}
+
+.status-like_only {
+  @apply bg-blue-50 text-blue-700 border-blue-200;
+}
+
+.status-comment_only {
+  @apply bg-amber-50 text-amber-700 border-amber-200;
+}
+
+.status-missing {
+  @apply bg-rose-50 text-rose-700 border-rose-200;
+}
