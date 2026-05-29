@@ -1,6 +1,7 @@
 import { EngagementType, ScrapeJobStatus } from "@prisma/client";
 import { prisma } from "../database/prisma.js";
 import { InstagramScraper } from "../scraping/InstagramScraper.js";
+import { logger } from "../utils/logger.js";
 import { scoringService } from "./scoringService.js";
 
 export const instagramJobService = {
@@ -8,12 +9,17 @@ export const instagramJobService = {
     const targets = await prisma.targetAccount.findMany({
       where: { isActive: true, ...(targetAccountId ? { id: targetAccountId } : {}) }
     });
+    logger.info("Discovering Instagram posts", { targetCount: targets.length, targetAccountId });
 
     const scraper = new InstagramScraper();
     try {
       await scraper.loadSession();
       for (const target of targets) {
         const posts = await scraper.discoverPosts(target.username);
+        logger.info("Discovered Instagram posts for target", {
+          username: target.username,
+          postCount: posts.length
+        });
         for (const post of posts) {
           await prisma.instagramPost.upsert({
             where: { instagramPostId: post.instagramPostId },

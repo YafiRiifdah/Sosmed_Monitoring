@@ -8,6 +8,7 @@ RUN apt-get update \
 
 COPY package.json package-lock.json* ./
 RUN npm install
+RUN npx playwright install --with-deps chromium
 
 COPY prisma ./prisma
 RUN npx prisma generate
