@@ -32,7 +32,7 @@ export class InstagramScraper {
       );
     }
 
-    this.browser = await chromium.launch({ headless: true });
+    this.browser = await chromium.launch({ channel: "chromium", headless: true });
     this.context = await this.browser.newContext({ storageState: env.INSTAGRAM_STORAGE_STATE });
     const page = await this.context.newPage();
     await page.goto("https://www.instagram.com/", { waitUntil: "domcontentloaded", timeout: 45000 });
