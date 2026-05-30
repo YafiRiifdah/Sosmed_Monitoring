@@ -139,17 +139,11 @@ export class InstagramScraper {
     try {
       await this.openPost(page, postUrl);
 
-      const likeButton = page.locator('a[href*="/liked_by/"], a:has-text("likes"), a:has-text("like"), span:has-text("likes"), span:has-text("like"), span:has-text("suka")').first();
-      const hasLikeButton = await likeButton.isVisible().catch(() => false);
-      if (!hasLikeButton) {
+      const openedLikesDialog = await this.openLikesDialog(page);
+      if (!openedLikesDialog) {
         await this.saveDebugArtifact(page, postUrl, "like-trigger-not-found");
         return [];
       }
-
-      await likeButton.click({ timeout: 10000 }).catch(async () => {
-        const fallback = page.getByText(/likes?|suka/i).first();
-        await fallback.click({ timeout: 10000 });
-      });
 
       const dialog = page.locator('div[role="dialog"]').last();
       const hasDialog = await dialog.waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false);
@@ -176,6 +170,72 @@ export class InstagramScraper {
     } finally {
       await page.close();
     }
+  }
+
+  private async openLikesDialog(page: Page) {
+    const textLikeTrigger = page
+      .locator(
+        'a[href*="/liked_by/"], a:has-text("likes"), a:has-text("like"), span:has-text("likes"), span:has-text("like"), span:has-text("suka")'
+      )
+      .first();
+
+    if (await textLikeTrigger.isVisible().catch(() => false)) {
+      await textLikeTrigger.click({ timeout: 10000 }).catch(async () => {
+        const fallback = page.getByText(/likes?|suka/i).first();
+        await fallback.click({ timeout: 10000 });
+      });
+      if (await this.waitForLikesDialog(page)) return true;
+    }
+
+    const clickedNumericLikeCount = await page.evaluate(() => {
+      const isVisible = (element: Element) => {
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element as HTMLElement);
+        return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+      };
+
+      const normalizeNumber = (text: string) => text.trim().replace(/\s+/g, "");
+      const isLikeCountText = (text: string) => /^[0-9][0-9.,]*[kKmM]?$/.test(normalizeNumber(text));
+      const heartIcon = document.querySelector('svg[aria-label="Like"], svg[aria-label="Unlike"]');
+      if (!heartIcon) return false;
+
+      const heartRect = heartIcon.getBoundingClientRect();
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>("a, button, span, div"))
+        .filter((element) => isVisible(element))
+        .filter((element) => isLikeCountText(element.textContent ?? ""))
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            element,
+            rect,
+            distance:
+              Math.abs(rect.top - heartRect.top) +
+              Math.abs(rect.bottom - heartRect.bottom) +
+              Math.max(0, rect.left - heartRect.right)
+          };
+        })
+        .filter(({ rect }) => rect.left >= heartRect.left - 8 && rect.top >= heartRect.top - 24 && rect.top <= heartRect.bottom + 44)
+        .sort((a, b) => a.distance - b.distance);
+
+      const target = candidates[0]?.element;
+      if (!target) return false;
+
+      const clickable = target.closest<HTMLElement>("a, button") ?? target;
+      clickable.click();
+      return true;
+    });
+
+    if (!clickedNumericLikeCount) return false;
+    return this.waitForLikesDialog(page);
+  }
+
+  private async waitForLikesDialog(page: Page) {
+    return page
+      .locator('div[role="dialog"]')
+      .last()
+      .waitFor({ state: "visible", timeout: 10000 })
+      .then(() => true)
+      .catch(() => false);
   }
 
   async fetchComments(postUrl: string): Promise<CommentResult[]> {
