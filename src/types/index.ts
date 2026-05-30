@@ -2,7 +2,7 @@ export type Account = {
   id: string;
   username: string;
   displayName?: string | null;
-  kontingen?: string | null;
+  cabangPac?: string | null;
   isActive: boolean;
   createdAt: string;
 };

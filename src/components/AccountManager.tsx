@@ -15,7 +15,7 @@ export function AccountManager({ title, kind }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Account | null>(null);
-  const [form, setForm] = useState({ username: "", displayName: "", kontingen: "", isActive: true });
+  const [form, setForm] = useState({ username: "", displayName: "", cabangPac: "", isActive: true });
   const [bulkText, setBulkText] = useState("");
 
   const load = useCallback(async () => {
@@ -39,7 +39,7 @@ export function AccountManager({ title, kind }: Props) {
     const payload = {
       username: form.username,
       displayName: form.displayName || null,
-      ...(kind === "monitored" ? { kontingen: form.kontingen || null } : {}),
+      ...(kind === "monitored" ? { cabangPac: form.cabangPac || null } : {}),
       isActive: form.isActive
     };
 
@@ -50,7 +50,7 @@ export function AccountManager({ title, kind }: Props) {
     }
 
     setEditing(null);
-    setForm({ username: "", displayName: "", kontingen: "", isActive: true });
+    setForm({ username: "", displayName: "", cabangPac: "", isActive: true });
     await load();
   }
 
@@ -61,8 +61,8 @@ export function AccountManager({ title, kind }: Props) {
       .map((line) => line.trim())
       .filter(Boolean)
       .map((line) => {
-        const [username = "", displayName = "", kontingen = ""] = line.split(/[,;\t]/).map((part) => part.trim());
-        return { username, displayName: displayName || null, kontingen: kontingen || null, isActive: true };
+        const [username = "", displayName = "", cabangPac = ""] = line.split(/[,;\t]/).map((part) => part.trim());
+        return { username, displayName: displayName || null, cabangPac: cabangPac || null, isActive: true };
       })
       .filter((account) => account.username);
 
@@ -88,7 +88,7 @@ export function AccountManager({ title, kind }: Props) {
     setForm({
       username: account.username,
       displayName: account.displayName ?? "",
-      kontingen: account.kontingen ?? "",
+      cabangPac: account.cabangPac ?? "",
       isActive: account.isActive
     });
   }
@@ -117,9 +117,9 @@ export function AccountManager({ title, kind }: Props) {
         {kind === "monitored" && (
           <input
             className="h-10 rounded-md border border-line px-3 text-sm"
-            placeholder="kontingen"
-            value={form.kontingen}
-            onChange={(event) => setForm((current) => ({ ...current, kontingen: event.target.value }))}
+            placeholder="Cabang PAC"
+            value={form.cabangPac}
+            onChange={(event) => setForm((current) => ({ ...current, cabangPac: event.target.value }))}
           />
         )}
         <label className="flex h-10 items-center gap-2 text-sm">
@@ -141,7 +141,7 @@ export function AccountManager({ title, kind }: Props) {
               variant="ghost"
               onClick={() => {
                 setEditing(null);
-                setForm({ username: "", displayName: "", kontingen: "", isActive: true });
+                setForm({ username: "", displayName: "", cabangPac: "", isActive: true });
               }}
             >
               Cancel
@@ -155,13 +155,13 @@ export function AccountManager({ title, kind }: Props) {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold">Bulk import akun wajib PAC</h2>
-              <p className="text-xs text-slate-500">Format per baris: username, display name, kontingen</p>
+              <p className="text-xs text-slate-500">Format per baris: username, display name, Cabang PAC</p>
             </div>
             <Button icon={<Upload size={16} />} type="submit" variant="ghost">Import</Button>
           </div>
           <textarea
             className="min-h-28 w-full resize-y rounded-md border border-line px-3 py-2 text-sm"
-            placeholder={"pac_user_1, PAC 1, Kontingen A\npac_user_2, PAC 2, Kontingen A"}
+            placeholder={"pac_user_1, PAC 1, Cabang PAC A\npac_user_2, PAC 2, Cabang PAC A"}
             value={bulkText}
             onChange={(event) => setBulkText(event.target.value)}
           />
@@ -178,7 +178,7 @@ export function AccountManager({ title, kind }: Props) {
             <tr>
               <th className="px-4 py-3">Username</th>
               <th className="px-4 py-3">Display Name</th>
-              {kind === "monitored" && <th className="px-4 py-3">Kontingen</th>}
+              {kind === "monitored" && <th className="px-4 py-3">Cabang PAC</th>}
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -188,7 +188,7 @@ export function AccountManager({ title, kind }: Props) {
               <tr key={account.id} className="border-t border-line">
                 <td className="px-4 py-3 font-medium">@{account.username}</td>
                 <td className="px-4 py-3 text-slate-600">{account.displayName ?? "-"}</td>
-                {kind === "monitored" && <td className="px-4 py-3 text-slate-600">{account.kontingen ?? "-"}</td>}
+                {kind === "monitored" && <td className="px-4 py-3 text-slate-600">{account.cabangPac ?? "-"}</td>}
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold ${account.isActive ? "border-teal-200 bg-teal-50 text-teal-700" : "border-slate-200 bg-slate-50 text-slate-500"}`}>
                     {account.isActive && <Check size={13} />}
