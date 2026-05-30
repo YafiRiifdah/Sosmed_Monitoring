@@ -15,6 +15,10 @@ function formatCaptionPreview(caption?: string | null) {
   return `${normalizedCaption.slice(0, CAPTION_PREVIEW_LIMIT).trimEnd()}...`;
 }
 
+function extractInstagramPostId(value: string) {
+  return value.match(/\/(?:p|reel)\/([^/?#]+)/i)?.[1]?.toLowerCase() ?? "";
+}
+
 export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => void }) {
   const { data, loading, error, reload } = useAsync(useCallback(() => api.posts(), []));
   const [targets, setTargets] = useState<Account[]>([]);
@@ -23,9 +27,12 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
   const [postUrl, setPostUrl] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const posts = (data ?? []).filter((post) =>
-    `${post.targetAccount.username} ${post.caption ?? ""} ${post.instagramPostId} ${post.postUrl}`.toLowerCase().includes(query.toLowerCase())
-  );
+  const normalizedQuery = query.trim().toLowerCase();
+  const queryPostId = extractInstagramPostId(query);
+  const posts = (data ?? []).filter((post) => {
+    const searchableText = `${post.targetAccount.username} ${post.caption ?? ""} ${post.instagramPostId} ${post.postUrl}`.toLowerCase();
+    return !normalizedQuery || searchableText.includes(normalizedQuery) || Boolean(queryPostId && post.instagramPostId.toLowerCase() === queryPostId);
+  });
 
   useEffect(() => {
     void api.targetAccounts().then((accounts) => {
@@ -39,8 +46,10 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
     setFormError(null);
     setMessage(null);
     try {
-      await api.trackPost({ targetAccountId, postUrl });
+      const trackedPostUrl = postUrl;
+      await api.trackPost({ targetAccountId, postUrl: trackedPostUrl });
       setPostUrl("");
+      setQuery(extractInstagramPostId(trackedPostUrl) || trackedPostUrl);
       setMessage("Post tracked");
       await reload();
     } catch (err) {
