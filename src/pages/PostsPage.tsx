@@ -6,6 +6,15 @@ import { useAsync } from "../hooks/useAsync";
 import { api } from "../services/api";
 import type { Account, PostSummary } from "../types";
 
+const CAPTION_PREVIEW_LIMIT = 90;
+
+function formatCaptionPreview(caption?: string | null) {
+  if (!caption) return "-";
+  const normalizedCaption = caption.replace(/\s+/g, " ").trim();
+  if (normalizedCaption.length <= CAPTION_PREVIEW_LIMIT) return normalizedCaption;
+  return `${normalizedCaption.slice(0, CAPTION_PREVIEW_LIMIT).trimEnd()}...`;
+}
+
 export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => void }) {
   const { data, loading, error, reload } = useAsync(useCallback(() => api.posts(), []));
   const [targets, setTargets] = useState<Account[]>([]);
@@ -108,7 +117,11 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
             {posts.map((post) => (
               <tr key={post.id} className="border-t border-line">
                 <td className="px-4 py-3 font-medium">@{post.targetAccount.username}</td>
-                <td className="max-w-md px-4 py-3 text-slate-600">{post.caption ? post.caption.slice(0, 100) : "-"}</td>
+                <td className="max-w-md px-4 py-3 text-slate-600">
+                  <span className="line-clamp-2" title={post.caption ?? undefined}>
+                    {formatCaptionPreview(post.caption)}
+                  </span>
+                </td>
                 <td className="px-4 py-3 text-slate-600">{post.postedAt ? new Date(post.postedAt).toLocaleDateString() : "-"}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
