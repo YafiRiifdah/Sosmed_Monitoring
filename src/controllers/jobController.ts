@@ -17,5 +17,8 @@ export const jobController = {
   recalculateScore: async (req: Request, res: Response) => {
     const data = optionalPostSchema.parse(req.body ?? {});
     res.status(202).json(await jobService.enqueueScoring(data.postId));
+  },
+  getJob: async (req: Request, res: Response) => {
+    res.json(await jobService.getJob(String(req.params.id)));
   }
 };

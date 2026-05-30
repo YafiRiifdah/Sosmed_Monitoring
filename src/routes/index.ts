@@ -12,6 +12,7 @@ apiRouter.get("/ranking", asyncHandler(dashboardController.ranking));
 
 apiRouter.get("/monitored-accounts", asyncHandler(monitoredAccountController.list));
 apiRouter.post("/monitored-accounts", asyncHandler(monitoredAccountController.create));
+apiRouter.post("/monitored-accounts/bulk", asyncHandler(monitoredAccountController.bulk));
 apiRouter.put("/monitored-accounts/:id", asyncHandler(monitoredAccountController.update));
 apiRouter.delete("/monitored-accounts/:id", asyncHandler(monitoredAccountController.remove));
 
@@ -27,3 +28,4 @@ apiRouter.get("/posts/:id/status", asyncHandler(dashboardController.postStatus))
 apiRouter.post("/jobs/discover-posts", asyncHandler(jobController.discoverPosts));
 apiRouter.post("/jobs/fetch-engagements", asyncHandler(jobController.fetchEngagements));
 apiRouter.post("/jobs/recalculate-score", asyncHandler(jobController.recalculateScore));
+apiRouter.get("/jobs/:id", asyncHandler(jobController.getJob));

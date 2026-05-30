@@ -31,12 +31,14 @@ export const postService = {
       where: { instagramPostId },
       update: {
         targetAccountId: data.targetAccountId,
-        postUrl
+        postUrl,
+        isManuallyTracked: true
       },
       create: {
         targetAccountId: data.targetAccountId,
         instagramPostId,
-        postUrl
+        postUrl,
+        isManuallyTracked: true
       },
       include: { targetAccount: true }
     });

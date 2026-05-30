@@ -36,6 +36,7 @@ model MonitoredAccount {
   id        String              @id @default(uuid())
   username  String              @unique
   displayName String?           @map("display_name")
+  kontingen String?
   isActive  Boolean             @default(true) @map("is_active")
   createdAt DateTime            @default(now()) @map("created_at")
   statuses  AccountPostStatus[]
@@ -62,6 +63,7 @@ model InstagramPost {
   caption         String?
   postedAt        DateTime?           @map("posted_at")
   engagementFetchedAt DateTime?       @map("engagement_fetched_at")
+  isManuallyTracked Boolean           @default(false) @map("is_manually_tracked")
   createdAt       DateTime            @default(now()) @map("created_at")
   targetAccount   TargetAccount       @relation(fields: [targetAccountId], references: [id], onDelete: Cascade)
   engagements     Engagement[]

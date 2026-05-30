@@ -47,6 +47,8 @@ export const dashboardService = {
         postUrl: post.postUrl,
         caption: post.caption,
         postedAt: post.postedAt,
+        engagementFetchedAt: post.engagementFetchedAt,
+        isManuallyTracked: post.isManuallyTracked,
         targetAccount: post.targetAccount,
         engagementPercentage: total === 0 ? 0 : Math.round((complete / total) * 100)
       };

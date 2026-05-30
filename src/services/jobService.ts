@@ -25,5 +25,9 @@ export const jobService = {
     });
     await scoringQueue.add("recalculate-score", { scrapeJobId: scrapeJob.id, postId });
     return scrapeJob;
+  },
+
+  getJob(id: string) {
+    return prisma.scrapeJob.findUniqueOrThrow({ where: { id } });
   }
 };
