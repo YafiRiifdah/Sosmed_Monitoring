@@ -2,6 +2,7 @@ export type Account = {
   id: string;
   username: string;
   displayName?: string | null;
+  kontingen?: string | null;
   isActive: boolean;
   createdAt: string;
 };
@@ -21,8 +22,21 @@ export type PostSummary = {
   postUrl: string;
   caption?: string | null;
   postedAt?: string | null;
+  engagementFetchedAt?: string | null;
+  isManuallyTracked: boolean;
   targetAccount: Account;
   engagementPercentage: number;
+};
+
+export type ScrapeJobStatus = "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED";
+
+export type ScrapeJob = {
+  id: string;
+  jobType: "POST_DISCOVERY" | "ENGAGEMENT_FETCH" | "SCORING";
+  status: ScrapeJobStatus;
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PostStatus = "COMPLETE" | "LIKE_ONLY" | "COMMENT_ONLY" | "MISSING";

@@ -1,4 +1,4 @@
-import { Check, Pencil, Plus, Save, Trash2, X } from "lucide-react";
+import { Check, Pencil, Plus, Save, Trash2, Upload, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { api } from "../services/api";
 import type { Account } from "../types";
@@ -15,7 +15,8 @@ export function AccountManager({ title, kind }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Account | null>(null);
-  const [form, setForm] = useState({ username: "", displayName: "", isActive: true });
+  const [form, setForm] = useState({ username: "", displayName: "", kontingen: "", isActive: true });
+  const [bulkText, setBulkText] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -38,6 +39,7 @@ export function AccountManager({ title, kind }: Props) {
     const payload = {
       username: form.username,
       displayName: form.displayName || null,
+      ...(kind === "monitored" ? { kontingen: form.kontingen || null } : {}),
       isActive: form.isActive
     };
 
@@ -48,7 +50,30 @@ export function AccountManager({ title, kind }: Props) {
     }
 
     setEditing(null);
-    setForm({ username: "", displayName: "", isActive: true });
+    setForm({ username: "", displayName: "", kontingen: "", isActive: true });
+    await load();
+  }
+
+  async function submitBulkImport(event: FormEvent) {
+    event.preventDefault();
+    const accounts = bulkText
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [username = "", displayName = "", kontingen = ""] = line.split(/[,;\t]/).map((part) => part.trim());
+        return { username, displayName: displayName || null, kontingen: kontingen || null, isActive: true };
+      })
+      .filter((account) => account.username);
+
+    if (accounts.length === 0) {
+      setError("Isi minimal satu username untuk bulk import.");
+      return;
+    }
+
+    setError(null);
+    await api.bulkImportMonitored(accounts);
+    setBulkText("");
     await load();
   }
 
@@ -60,7 +85,12 @@ export function AccountManager({ title, kind }: Props) {
 
   function edit(account: Account) {
     setEditing(account);
-    setForm({ username: account.username, displayName: account.displayName ?? "", isActive: account.isActive });
+    setForm({
+      username: account.username,
+      displayName: account.displayName ?? "",
+      kontingen: account.kontingen ?? "",
+      isActive: account.isActive
+    });
   }
 
   return (
@@ -70,7 +100,7 @@ export function AccountManager({ title, kind }: Props) {
         <Button onClick={() => void load()} variant="ghost">Refresh</Button>
       </div>
 
-      <form onSubmit={(event) => void submit(event)} className="grid gap-3 rounded-md border border-line bg-white p-4 md:grid-cols-[1fr_1fr_auto_auto]">
+      <form onSubmit={(event) => void submit(event)} className={`grid gap-3 rounded-md border border-line bg-white p-4 ${kind === "monitored" ? "md:grid-cols-[1fr_1fr_1fr_auto_auto]" : "md:grid-cols-[1fr_1fr_auto_auto]"}`}>
         <input
           className="h-10 rounded-md border border-line px-3 text-sm"
           placeholder="username"
@@ -84,6 +114,14 @@ export function AccountManager({ title, kind }: Props) {
           value={form.displayName}
           onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))}
         />
+        {kind === "monitored" && (
+          <input
+            className="h-10 rounded-md border border-line px-3 text-sm"
+            placeholder="kontingen"
+            value={form.kontingen}
+            onChange={(event) => setForm((current) => ({ ...current, kontingen: event.target.value }))}
+          />
+        )}
         <label className="flex h-10 items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -103,7 +141,7 @@ export function AccountManager({ title, kind }: Props) {
               variant="ghost"
               onClick={() => {
                 setEditing(null);
-                setForm({ username: "", displayName: "", isActive: true });
+                setForm({ username: "", displayName: "", kontingen: "", isActive: true });
               }}
             >
               Cancel
@@ -111,6 +149,24 @@ export function AccountManager({ title, kind }: Props) {
           )}
         </div>
       </form>
+
+      {kind === "monitored" && (
+        <form onSubmit={(event) => void submitBulkImport(event)} className="space-y-3 rounded-md border border-line bg-white p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">Bulk import akun wajib PAC</h2>
+              <p className="text-xs text-slate-500">Format per baris: username, display name, kontingen</p>
+            </div>
+            <Button icon={<Upload size={16} />} type="submit" variant="ghost">Import</Button>
+          </div>
+          <textarea
+            className="min-h-28 w-full resize-y rounded-md border border-line px-3 py-2 text-sm"
+            placeholder={"pac_user_1, PAC 1, Kontingen A\npac_user_2, PAC 2, Kontingen A"}
+            value={bulkText}
+            onChange={(event) => setBulkText(event.target.value)}
+          />
+        </form>
+      )}
 
       {error && <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>}
       {loading ? <div className="text-sm text-slate-500">Loading...</div> : null}
@@ -122,6 +178,7 @@ export function AccountManager({ title, kind }: Props) {
             <tr>
               <th className="px-4 py-3">Username</th>
               <th className="px-4 py-3">Display Name</th>
+              {kind === "monitored" && <th className="px-4 py-3">Kontingen</th>}
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -131,6 +188,7 @@ export function AccountManager({ title, kind }: Props) {
               <tr key={account.id} className="border-t border-line">
                 <td className="px-4 py-3 font-medium">@{account.username}</td>
                 <td className="px-4 py-3 text-slate-600">{account.displayName ?? "-"}</td>
+                {kind === "monitored" && <td className="px-4 py-3 text-slate-600">{account.kontingen ?? "-"}</td>}
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold ${account.isActive ? "border-teal-200 bg-teal-50 text-teal-700" : "border-slate-200 bg-slate-50 text-slate-500"}`}>
                     {account.isActive && <Check size={13} />}
