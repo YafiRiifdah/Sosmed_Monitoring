@@ -19,6 +19,12 @@ export type PostMetadata = {
   postedAt?: Date;
 };
 
+export type EngagementResult = {
+  likes: string[];
+  comments: CommentResult[];
+  warnings: string[];
+};
+
 export class InstagramSessionError extends Error {
   constructor(message: string) {
     super(message);
@@ -209,6 +215,24 @@ export class InstagramScraper {
     } finally {
       await page.close();
     }
+  }
+
+  async fetchEngagement(postUrl: string): Promise<EngagementResult> {
+    const warnings: string[] = [];
+    const likes = await this.fetchLikes(postUrl).catch((error) => {
+      warnings.push(`Likes extraction failed: ${error instanceof Error ? error.message : String(error)}`);
+      return [];
+    });
+    const comments = await this.fetchComments(postUrl).catch((error) => {
+      warnings.push(`Comments extraction failed: ${error instanceof Error ? error.message : String(error)}`);
+      return [];
+    });
+
+    if (likes.length === 0) {
+      warnings.push("No likes were extracted. Instagram may hide the likes modal, the worker account may not be allowed to see it, or selectors need UI inspection.");
+    }
+
+    return { likes, comments, warnings };
   }
 
   async close() {

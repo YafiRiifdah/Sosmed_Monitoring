@@ -79,14 +79,15 @@ export const instagramJobService = {
           });
         }
 
-        const [likes, comments] = await Promise.all([
-          scraper.fetchLikes(post.postUrl),
-          scraper.fetchComments(post.postUrl)
-        ]);
+        const { likes, comments, warnings } = await scraper.fetchEngagement(post.postUrl);
+        for (const warning of warnings) {
+          logger.warn("Instagram engagement extraction warning", { postId: post.id, warning });
+        }
         logger.info("Fetched Instagram engagement for post", {
           postId: post.id,
           likes: likes.length,
-          comments: comments.length
+          comments: comments.length,
+          warnings: warnings.length
         });
 
         for (const username of likes) {
