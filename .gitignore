@@ -4,5 +4,6 @@ dist/
 .env.local
 storage_state.json
 session/storage_state.json
+debug/
 *.log
 npm-debug.log*

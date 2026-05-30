@@ -1,4 +1,6 @@
 import { existsSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 import { env } from "../config/env.js";
 
@@ -140,6 +142,7 @@ export class InstagramScraper {
       const likeButton = page.locator('a[href*="/liked_by/"], a:has-text("likes"), a:has-text("like"), span:has-text("likes"), span:has-text("like"), span:has-text("suka")').first();
       const hasLikeButton = await likeButton.isVisible().catch(() => false);
       if (!hasLikeButton) {
+        await this.saveDebugArtifact(page, postUrl, "like-trigger-not-found");
         return [];
       }
 
@@ -151,6 +154,7 @@ export class InstagramScraper {
       const dialog = page.locator('div[role="dialog"]').last();
       const hasDialog = await dialog.waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false);
       if (!hasDialog) {
+        await this.saveDebugArtifact(page, postUrl, "likes-dialog-not-visible");
         return [];
       }
       await this.scrollDialog(dialog, this.maxModalScrolls);
@@ -164,7 +168,11 @@ export class InstagramScraper {
           .filter(Boolean);
       });
 
-      return this.uniqueUsernames(usernames);
+      const uniqueUsernames = this.uniqueUsernames(usernames);
+      if (uniqueUsernames.length === 0) {
+        await this.saveDebugArtifact(page, postUrl, "likes-dialog-empty");
+      }
+      return uniqueUsernames;
     } finally {
       await page.close();
     }
@@ -306,5 +314,20 @@ export class InstagramScraper {
     const postId = this.extractPostId(postUrl);
     const type = postUrl.includes("/reel/") ? "reel" : "p";
     return `https://www.instagram.com/${type}/${postId}/`;
+  }
+
+  private async saveDebugArtifact(page: Page, postUrl: string, reason: string) {
+    if (!env.SCRAPE_DEBUG_ENABLED) return;
+    await mkdir(env.SCRAPE_DEBUG_DIR, { recursive: true });
+    const postId = this.extractPostId(postUrl);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const baseName = `${timestamp}-${postId}-${reason}`;
+    const screenshotPath = path.join(env.SCRAPE_DEBUG_DIR, `${baseName}.png`);
+    const htmlPath = path.join(env.SCRAPE_DEBUG_DIR, `${baseName}.html`);
+
+    await Promise.all([
+      page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => undefined),
+      writeFile(htmlPath, await page.content(), "utf8").catch(() => undefined)
+    ]);
   }
 }

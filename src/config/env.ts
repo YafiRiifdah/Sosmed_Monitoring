@@ -13,6 +13,8 @@ const schema = z.object({
   INSTAGRAM_DISCOVERY_POST_LIMIT: z.coerce.number().int().positive().default(12),
   AUTO_FETCH_POST_LIMIT: z.coerce.number().int().positive().default(3),
   SCRAPE_DELAY_MS: z.coerce.number().int().min(0).default(5000),
+  SCRAPE_DEBUG_ENABLED: z.coerce.boolean().default(true),
+  SCRAPE_DEBUG_DIR: z.string().default("./debug"),
   SCHEDULER_DISCOVER_CRON_MS: z.coerce.number().default(15 * 60 * 1000),
   SCHEDULER_ENGAGEMENT_CRON_MS: z.coerce.number().default(20 * 60 * 1000),
   SCHEDULER_SCORING_CRON_MS: z.coerce.number().default(10 * 60 * 1000)

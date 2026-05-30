@@ -33,12 +33,14 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       INSTAGRAM_STORAGE_STATE: /app/session/storage_state.json
+      SCRAPE_DEBUG_DIR: /app/debug
     command: ["node", "dist/workers/index.js"]
     depends_on:
       - redis
       - backend
     volumes:
       - ./session:/app/session:ro
+      - ./debug:/app/debug
 
   scheduler:
     build:
