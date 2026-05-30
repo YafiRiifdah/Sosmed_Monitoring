@@ -52,17 +52,24 @@ export const instagramJobService = {
     try {
       await scraper.loadSession();
       for (const post of posts) {
+        logger.info("Fetching Instagram engagement for post", { postId: post.id, postUrl: post.postUrl });
         const [likes, comments] = await Promise.all([
           scraper.fetchLikes(post.postUrl),
           scraper.fetchComments(post.postUrl)
         ]);
+        logger.info("Fetched Instagram engagement for post", {
+          postId: post.id,
+          likes: likes.length,
+          comments: comments.length
+        });
 
         for (const username of likes) {
+          const normalizedUsername = username.toLowerCase();
           await prisma.engagement.upsert({
             where: {
               postId_username_engagementType_commentText: {
                 postId: post.id,
-                username: username.toLowerCase(),
+                username: normalizedUsername,
                 engagementType: EngagementType.LIKE,
                 commentText: ""
               }
@@ -70,7 +77,7 @@ export const instagramJobService = {
             update: { detectedAt: new Date() },
             create: {
               postId: post.id,
-              username: username.toLowerCase(),
+              username: normalizedUsername,
               engagementType: EngagementType.LIKE,
               commentText: ""
             }
@@ -78,10 +85,20 @@ export const instagramJobService = {
         }
 
         for (const comment of comments) {
-          await prisma.engagement.create({
-            data: {
+          const normalizedUsername = comment.username.toLowerCase();
+          await prisma.engagement.upsert({
+            where: {
+              postId_username_engagementType_commentText: {
+                postId: post.id,
+                username: normalizedUsername,
+                engagementType: EngagementType.COMMENT,
+                commentText: comment.commentText
+              }
+            },
+            update: { detectedAt: new Date() },
+            create: {
               postId: post.id,
-              username: comment.username.toLowerCase(),
+              username: normalizedUsername,
               engagementType: EngagementType.COMMENT,
               commentText: comment.commentText
             }

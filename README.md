@@ -312,12 +312,12 @@ Sudah ada:
 - Error handling session expired
 - Guard untuk private/unavailable account
 
-Skeleton yang sengaja belum mengambil data palsu:
+Extractor engagement:
 
 - `InstagramScraper.fetchLikes(postUrl)`
 - `InstagramScraper.fetchComments(postUrl)`
 
-Dua method tersebut saat ini melempar error jelas sampai selector Instagram UI di-hardening dengan session valid.
+Keduanya memakai Playwright UI extraction dengan session valid. Extractor membuka post, membaca komentar yang terlihat setelah scroll terbatas, lalu membuka modal likes dan scroll terbatas untuk membaca username. Karena UI Instagram bisa berubah, hasil tetap perlu divalidasi berkala dengan akun worker dan target public.
 
 ## Batasan Scraping
 
