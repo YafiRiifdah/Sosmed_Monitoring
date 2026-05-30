@@ -3,12 +3,12 @@ import { prisma } from "../database/prisma.js";
 type AccountInput = {
   username?: string;
   displayName?: string | null;
-  kontingen?: string | null;
+  cabangPac?: string | null;
   isActive?: boolean;
 };
 
 export const accountService = {
-  listMonitored: () => prisma.monitoredAccount.findMany({ orderBy: [{ kontingen: "asc" }, { username: "asc" }] }),
+  listMonitored: () => prisma.monitoredAccount.findMany({ orderBy: [{ cabangPac: "asc" }, { username: "asc" }] }),
   createMonitored: (data: Required<Pick<AccountInput, "username">> & AccountInput) =>
     prisma.monitoredAccount.create({ data }),
   updateMonitored: (id: string, data: AccountInput) => prisma.monitoredAccount.update({ where: { id }, data }),
@@ -20,13 +20,13 @@ export const accountService = {
           where: { username: account.username },
           update: {
             displayName: account.displayName,
-            kontingen: account.kontingen,
+            cabangPac: account.cabangPac,
             isActive: account.isActive ?? true
           },
           create: {
             username: account.username,
             displayName: account.displayName,
-            kontingen: account.kontingen,
+            cabangPac: account.cabangPac,
             isActive: account.isActive ?? true
           }
         })

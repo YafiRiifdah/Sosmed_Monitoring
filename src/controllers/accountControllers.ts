@@ -5,10 +5,10 @@ import { accountService } from "../services/accountService.js";
 const accountSchema = z.object({
   username: z.string().trim().min(1).transform((value) => value.replace(/^@/, "").toLowerCase()),
   displayName: z.string().trim().optional().nullable(),
-  kontingen: z.string().trim().optional().nullable(),
+  cabangPac: z.string().trim().optional().nullable(),
   isActive: z.boolean().optional()
 });
-const targetAccountSchema = accountSchema.omit({ kontingen: true });
+const targetAccountSchema = accountSchema.omit({ cabangPac: true });
 const bulkMonitoredSchema = z.object({
   accounts: z.array(accountSchema).min(1).max(500)
 });

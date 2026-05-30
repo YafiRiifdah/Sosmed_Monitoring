@@ -36,7 +36,7 @@ model MonitoredAccount {
   id        String              @id @default(uuid())
   username  String              @unique
   displayName String?           @map("display_name")
-  kontingen String?
+  cabangPac String?            @map("kontingen")
   isActive  Boolean             @default(true) @map("is_active")
   createdAt DateTime            @default(now()) @map("created_at")
   statuses  AccountPostStatus[]
