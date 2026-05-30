@@ -69,7 +69,8 @@ export class InstagramScraper {
     await page.close();
 
     const posts: DiscoveredPost[] = [];
-    for (const postUrl of postLinks.slice(0, limit)) {
+    for (const rawPostUrl of postLinks.slice(0, limit)) {
+      const postUrl = this.normalizePostUrl(rawPostUrl);
       const metadata = await this.fetchPostMetadata(postUrl).catch((): PostMetadata => ({}));
       posts.push({
         instagramPostId: this.extractPostId(postUrl),
@@ -130,9 +131,7 @@ export class InstagramScraper {
     try {
       await this.openPost(page, postUrl);
 
-      const likeButton = page
-        .locator('a[href$="/liked_by/"], a[href*="/liked_by/"], span:has-text("likes"), span:has-text("like")')
-        .first();
+      const likeButton = page.locator('a[href*="/liked_by/"], a:has-text("likes"), a:has-text("like"), span:has-text("likes"), span:has-text("like"), span:has-text("suka")').first();
       const hasLikeButton = await likeButton.isVisible().catch(() => false);
       if (!hasLikeButton) {
         return [];
@@ -144,7 +143,10 @@ export class InstagramScraper {
       });
 
       const dialog = page.locator('div[role="dialog"]').last();
-      await dialog.waitFor({ state: "visible", timeout: 15000 });
+      const hasDialog = await dialog.waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false);
+      if (!hasDialog) {
+        return [];
+      }
       await this.scrollDialog(dialog, this.maxModalScrolls);
 
       const usernames = await dialog.evaluate((root) => {
@@ -225,7 +227,7 @@ export class InstagramScraper {
   }
 
   private async openPost(page: Page, postUrl: string) {
-    await page.goto(postUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await page.goto(this.normalizePostUrl(postUrl), { waitUntil: "domcontentloaded", timeout: 45000 });
     const loginVisible = await page.getByText(/log in|masuk/i).first().isVisible().catch(() => false);
     if (loginVisible || page.url().includes("/accounts/login")) {
       throw new InstagramSessionError("Instagram session expired while opening post. Please login manually again.");
@@ -274,5 +276,11 @@ export class InstagramScraper {
       throw new Error(`Unable to extract Instagram post id from ${postUrl}`);
     }
     return match[1];
+  }
+
+  private normalizePostUrl(postUrl: string) {
+    const postId = this.extractPostId(postUrl);
+    const type = postUrl.includes("/reel/") ? "reel" : "p";
+    return `https://www.instagram.com/${type}/${postId}/`;
   }
 }
