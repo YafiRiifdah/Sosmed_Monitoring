@@ -110,6 +110,9 @@ REDIS_PORT=6379
 PORT=4000
 NODE_ENV=development
 INSTAGRAM_STORAGE_STATE=./storage_state.json
+INSTAGRAM_DISCOVERY_POST_LIMIT=12
+AUTO_FETCH_POST_LIMIT=3
+SCRAPE_DELAY_MS=5000
 SCHEDULER_DISCOVER_CRON_MS=900000
 SCHEDULER_ENGAGEMENT_CRON_MS=1200000
 SCHEDULER_SCORING_CRON_MS=600000
@@ -257,6 +260,14 @@ Worker functions:
 
 Untuk akun target yang memiliki ratusan post, gunakan `POST /api/posts/track` dengan URL post tertentu. Dengan cara ini admin tidak perlu discovery seluruh timeline; post yang dipilih langsung masuk `instagram_posts` dan bisa diproses oleh `POST /api/jobs/fetch-engagements` menggunakan `postId`.
 
+Pola aman untuk akun target dengan banyak postingan:
+
+- Discovery otomatis hanya mengambil post terbaru sesuai `INSTAGRAM_DISCOVERY_POST_LIMIT`.
+- Auto fetch hanya mengambil post yang belum pernah dicek engagement-nya, maksimal `AUTO_FETCH_POST_LIMIT` post per job.
+- Manual fetch dari dashboard tetap bisa memproses post tertentu meskipun sudah pernah dicek.
+- Worker Playwright berjalan dengan concurrency `1`.
+- `SCRAPE_DELAY_MS` memberi jeda antar post dalam batch auto fetch.
+
 BullMQ job behavior:
 
 - Retry mechanism
@@ -278,6 +289,12 @@ Interval dikontrol lewat:
 - `SCHEDULER_DISCOVER_CRON_MS`
 - `SCHEDULER_ENGAGEMENT_CRON_MS`
 - `SCHEDULER_SCORING_CRON_MS`
+
+Default MVP yang disarankan:
+
+- Discover: 3 akun target x 12 post terbaru = maksimal 36 post per discovery cycle.
+- Fetch: batch kecil post baru/belum dicek, atau manual per post dari dashboard.
+- Scoring: boleh berjalan berkala karena hanya menghitung ulang data database.
 
 ## Playwright Instagram Session
 

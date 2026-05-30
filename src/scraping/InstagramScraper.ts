@@ -52,7 +52,7 @@ export class InstagramScraper {
     await page.close();
   }
 
-  async discoverPosts(username: string): Promise<DiscoveredPost[]> {
+  async discoverPosts(username: string, limit = 12): Promise<DiscoveredPost[]> {
     const context = await this.requireContext();
     const page = await context.newPage();
     await page.goto(`https://www.instagram.com/${username}/`, { waitUntil: "domcontentloaded", timeout: 45000 });
@@ -64,12 +64,12 @@ export class InstagramScraper {
 
     await page.waitForTimeout(3000);
     const postLinks = await page.$$eval('a[href*="/p/"], a[href*="/reel/"]', (links) =>
-      Array.from(new Set(links.map((link) => (link as HTMLAnchorElement).href))).slice(0, 12)
+      Array.from(new Set(links.map((link) => (link as HTMLAnchorElement).href)))
     );
     await page.close();
 
     const posts: DiscoveredPost[] = [];
-    for (const postUrl of postLinks) {
+    for (const postUrl of postLinks.slice(0, limit)) {
       const metadata = await this.fetchPostMetadata(postUrl).catch((): PostMetadata => ({}));
       posts.push({
         instagramPostId: this.extractPostId(postUrl),

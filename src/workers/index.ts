@@ -5,6 +5,8 @@ import { scoringService } from "../services/scoringService.js";
 import { logger } from "../utils/logger.js";
 
 type BaseJobData = { scrapeJobId?: string };
+const playwrightWorkerOptions = { connection: redisConnection, concurrency: 1, lockDuration: 15 * 60 * 1000 };
+const lightWorkerOptions = { connection: redisConnection, concurrency: 1 };
 
 new Worker<BaseJobData & { targetAccountId?: string }>(
   "post-discovery",
@@ -24,7 +26,7 @@ new Worker<BaseJobData & { targetAccountId?: string }>(
       throw error;
     }
   },
-  { connection: redisConnection }
+  playwrightWorkerOptions
 );
 
 new Worker<BaseJobData & { postId?: string }>(
@@ -45,7 +47,7 @@ new Worker<BaseJobData & { postId?: string }>(
       throw error;
     }
   },
-  { connection: redisConnection }
+  playwrightWorkerOptions
 );
 
 new Worker<BaseJobData & { postId?: string }>(
@@ -70,7 +72,7 @@ new Worker<BaseJobData & { postId?: string }>(
       throw error;
     }
   },
-  { connection: redisConnection }
+  lightWorkerOptions
 );
 
 logger.info("Workers started");

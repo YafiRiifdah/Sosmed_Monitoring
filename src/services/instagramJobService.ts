@@ -1,4 +1,5 @@
 import { EngagementType, ScrapeJobStatus } from "@prisma/client";
+import { env } from "../config/env.js";
 import { prisma } from "../database/prisma.js";
 import { InstagramScraper, type PostMetadata } from "../scraping/InstagramScraper.js";
 import { logger } from "../utils/logger.js";
@@ -15,10 +16,11 @@ export const instagramJobService = {
     try {
       await scraper.loadSession();
       for (const target of targets) {
-        const posts = await scraper.discoverPosts(target.username);
+        const posts = await scraper.discoverPosts(target.username, env.INSTAGRAM_DISCOVERY_POST_LIMIT);
         logger.info("Discovered Instagram posts for target", {
           username: target.username,
-          postCount: posts.length
+          postCount: posts.length,
+          limit: env.INSTAGRAM_DISCOVERY_POST_LIMIT
         });
         for (const post of posts) {
           await prisma.instagramPost.upsert({
@@ -45,13 +47,20 @@ export const instagramJobService = {
 
   async fetchPostEngagement(postId?: string) {
     const posts = await prisma.instagramPost.findMany({
-      where: postId ? { id: postId } : undefined
+      where: postId ? { id: postId } : { engagementFetchedAt: null },
+      orderBy: [{ postedAt: "desc" }, { createdAt: "desc" }],
+      take: postId ? undefined : env.AUTO_FETCH_POST_LIMIT
+    });
+    logger.info("Selected posts for engagement fetch", {
+      mode: postId ? "manual" : "auto",
+      postCount: posts.length,
+      autoFetchLimit: env.AUTO_FETCH_POST_LIMIT
     });
 
     const scraper = new InstagramScraper();
     try {
       await scraper.loadSession();
-      for (const post of posts) {
+      for (const [index, post] of posts.entries()) {
         logger.info("Fetching Instagram engagement for post", { postId: post.id, postUrl: post.postUrl });
         const metadata: PostMetadata = await scraper.fetchPostMetadata(post.postUrl).catch((error): PostMetadata => {
           logger.warn("Failed to fetch Instagram post metadata", {
@@ -122,7 +131,14 @@ export const instagramJobService = {
           });
         }
 
+        await prisma.instagramPost.update({
+          where: { id: post.id },
+          data: { engagementFetchedAt: new Date() }
+        });
         await scoringService.recalculatePostStatus(post.id);
+        if (index < posts.length - 1 && env.SCRAPE_DELAY_MS > 0) {
+          await new Promise((resolve) => setTimeout(resolve, env.SCRAPE_DELAY_MS));
+        }
       }
     } finally {
       await scraper.close();
