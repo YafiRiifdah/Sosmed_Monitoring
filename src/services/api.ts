@@ -23,6 +23,8 @@ export const api = {
   overview: () => request<Overview>("/api/overview"),
   ranking: () => request<RankingRow[]>("/api/ranking"),
   posts: () => request<PostSummary[]>("/api/posts"),
+  trackPost: (data: { targetAccountId: string; postUrl: string }) =>
+    request<PostSummary>("/api/posts/track", { method: "POST", body: json(data) }),
   postStatus: (id: string) => request<PostDetail>(`/api/posts/${id}/status`),
 
   monitoredAccounts: () => request<Account[]>("/api/monitored-accounts"),
@@ -36,6 +38,6 @@ export const api = {
   deleteTarget: (id: string) => request<void>(`/api/target-accounts/${id}`, { method: "DELETE" }),
 
   discoverPosts: () => request("/api/jobs/discover-posts", { method: "POST", body: json({}) }),
-  fetchEngagements: () => request("/api/jobs/fetch-engagements", { method: "POST", body: json({}) }),
+  fetchEngagements: (postId?: string) => request("/api/jobs/fetch-engagements", { method: "POST", body: json({ postId }) }),
   recalculateScore: () => request("/api/jobs/recalculate-score", { method: "POST", body: json({}) })
 };

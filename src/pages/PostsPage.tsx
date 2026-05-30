@@ -1,17 +1,54 @@
-import { ExternalLink, Search } from "lucide-react";
-import { useCallback, useState } from "react";
+import { ExternalLink, Play, Plus, Search } from "lucide-react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "../components/Button";
 import { EmptyState } from "../components/EmptyState";
 import { useAsync } from "../hooks/useAsync";
 import { api } from "../services/api";
-import type { PostSummary } from "../types";
+import type { Account, PostSummary } from "../types";
 
 export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => void }) {
   const { data, loading, error, reload } = useAsync(useCallback(() => api.posts(), []));
+  const [targets, setTargets] = useState<Account[]>([]);
   const [query, setQuery] = useState("");
+  const [targetAccountId, setTargetAccountId] = useState("");
+  const [postUrl, setPostUrl] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const posts = (data ?? []).filter((post) =>
-    `${post.targetAccount.username} ${post.caption ?? ""}`.toLowerCase().includes(query.toLowerCase())
+    `${post.targetAccount.username} ${post.caption ?? ""} ${post.instagramPostId} ${post.postUrl}`.toLowerCase().includes(query.toLowerCase())
   );
+
+  useEffect(() => {
+    void api.targetAccounts().then((accounts) => {
+      setTargets(accounts.filter((account) => account.isActive));
+      setTargetAccountId((current) => current || accounts.find((account) => account.isActive)?.id || "");
+    });
+  }, []);
+
+  async function submitTrackPost(event: FormEvent) {
+    event.preventDefault();
+    setFormError(null);
+    setMessage(null);
+    try {
+      await api.trackPost({ targetAccountId, postUrl });
+      setPostUrl("");
+      setMessage("Post tracked");
+      await reload();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Failed to track post");
+    }
+  }
+
+  async function fetchPost(post: PostSummary) {
+    setFormError(null);
+    setMessage(null);
+    try {
+      await api.fetchEngagements(post.id);
+      setMessage("Fetch job queued");
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Failed to queue fetch job");
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -19,6 +56,29 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
         <h1 className="text-2xl font-semibold">Posts</h1>
         <Button onClick={() => void reload()} variant="ghost">Refresh</Button>
       </div>
+      <form onSubmit={(event) => void submitTrackPost(event)} className="grid gap-3 rounded-md border border-line bg-white p-4 md:grid-cols-[260px_1fr_auto]">
+        <select
+          className="h-10 rounded-md border border-line px-3 text-sm"
+          value={targetAccountId}
+          onChange={(event) => setTargetAccountId(event.target.value)}
+          required
+        >
+          <option value="" disabled>Select target</option>
+          {targets.map((target) => (
+            <option key={target.id} value={target.id}>
+              @{target.username}
+            </option>
+          ))}
+        </select>
+        <input
+          className="h-10 rounded-md border border-line px-3 text-sm"
+          placeholder="https://www.instagram.com/p/..."
+          value={postUrl}
+          onChange={(event) => setPostUrl(event.target.value)}
+          required
+        />
+        <Button icon={<Plus size={16} />} type="submit">Track</Button>
+      </form>
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-2.5 text-slate-400" size={17} />
         <input
@@ -28,6 +88,8 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
           onChange={(event) => setQuery(event.target.value)}
         />
       </div>
+      {formError && <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{formError}</div>}
+      {message && <div className="rounded-md border border-teal-200 bg-teal-50 p-3 text-sm text-teal-700">{message}</div>}
       {error && <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>}
       {loading ? <div className="text-sm text-slate-500">Loading...</div> : null}
       {!loading && posts.length === 0 ? <EmptyState message="No posts discovered yet." /> : null}
@@ -58,6 +120,7 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
+                    <Button icon={<Play size={15} />} onClick={() => void fetchPost(post)} variant="ghost">Fetch</Button>
                     <Button onClick={() => onOpenPost(post)} variant="ghost">Status</Button>
                     <a className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-3 text-sm font-medium text-ink" href={post.postUrl} target="_blank" rel="noreferrer">
                       <ExternalLink size={16} />

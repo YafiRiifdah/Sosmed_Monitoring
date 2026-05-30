@@ -67,10 +67,12 @@ frontend/
 
 4. Posts
    - List post
+   - Track specific Instagram post URL
    - Target account
    - Caption preview
    - Post date
    - Engagement percentage
+   - Trigger fetch engagement for selected post
 
 5. Post Detail
    - Username
@@ -167,6 +169,7 @@ Frontend memakai API backend berikut:
 - `PUT /api/target-accounts/:id`
 - `DELETE /api/target-accounts/:id`
 - `GET /api/posts`
+- `POST /api/posts/track`
 - `GET /api/posts/:id/status`
 - `POST /api/jobs/discover-posts`
 - `POST /api/jobs/fetch-engagements`
