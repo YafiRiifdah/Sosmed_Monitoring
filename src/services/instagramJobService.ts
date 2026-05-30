@@ -1,6 +1,6 @@
 import { EngagementType, ScrapeJobStatus } from "@prisma/client";
 import { prisma } from "../database/prisma.js";
-import { InstagramScraper } from "../scraping/InstagramScraper.js";
+import { InstagramScraper, type PostMetadata } from "../scraping/InstagramScraper.js";
 import { logger } from "../utils/logger.js";
 import { scoringService } from "./scoringService.js";
 
@@ -53,6 +53,23 @@ export const instagramJobService = {
       await scraper.loadSession();
       for (const post of posts) {
         logger.info("Fetching Instagram engagement for post", { postId: post.id, postUrl: post.postUrl });
+        const metadata: PostMetadata = await scraper.fetchPostMetadata(post.postUrl).catch((error): PostMetadata => {
+          logger.warn("Failed to fetch Instagram post metadata", {
+            postId: post.id,
+            error: error instanceof Error ? error.message : error
+          });
+          return {};
+        });
+        if (metadata.caption || metadata.postedAt) {
+          await prisma.instagramPost.update({
+            where: { id: post.id },
+            data: {
+              caption: metadata.caption,
+              postedAt: metadata.postedAt
+            }
+          });
+        }
+
         const [likes, comments] = await Promise.all([
           scraper.fetchLikes(post.postUrl),
           scraper.fetchComments(post.postUrl)

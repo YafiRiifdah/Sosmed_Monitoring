@@ -14,6 +14,11 @@ export type CommentResult = {
   commentText: string;
 };
 
+export type PostMetadata = {
+  caption?: string;
+  postedAt?: Date;
+};
+
 export class InstagramSessionError extends Error {
   constructor(message: string) {
     super(message);
@@ -63,10 +68,60 @@ export class InstagramScraper {
     );
     await page.close();
 
-    return postLinks.map((postUrl) => ({
-      instagramPostId: this.extractPostId(postUrl),
-      postUrl
-    }));
+    const posts: DiscoveredPost[] = [];
+    for (const postUrl of postLinks) {
+      const metadata = await this.fetchPostMetadata(postUrl).catch((): PostMetadata => ({}));
+      posts.push({
+        instagramPostId: this.extractPostId(postUrl),
+        postUrl,
+        caption: metadata.caption,
+        postedAt: metadata.postedAt
+      });
+    }
+
+    return posts;
+  }
+
+  async fetchPostMetadata(postUrl: string): Promise<PostMetadata> {
+    const context = await this.requireContext();
+    const page = await context.newPage();
+    try {
+      await this.openPost(page, postUrl);
+      const metadata = await page.evaluate(() => {
+        const time = document.querySelector<HTMLTimeElement>("time[datetime]");
+        const postedAt = time?.dateTime;
+
+        const directCaption =
+          document.querySelector("article h1")?.textContent?.trim() ||
+          document.querySelector("h1")?.textContent?.trim() ||
+          "";
+
+        const description =
+          document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.content ||
+          document.querySelector<HTMLMetaElement>('meta[name="description"]')?.content ||
+          "";
+
+        const parsedCaption = (() => {
+          const quoteMatch = description.match(/: "([\s\S]*)"$/);
+          if (quoteMatch?.[1]) return quoteMatch[1].trim();
+          const colonIndex = description.indexOf(": ");
+          if (colonIndex >= 0) return description.slice(colonIndex + 2).replace(/^"|"$/g, "").trim();
+          return "";
+        })();
+
+        const caption = directCaption || parsedCaption || undefined;
+        return {
+          caption,
+          postedAt
+        };
+      });
+      return {
+        caption: metadata.caption,
+        postedAt: metadata.postedAt ? new Date(metadata.postedAt) : undefined
+      };
+    } finally {
+      await page.close();
+    }
   }
 
   async fetchLikes(postUrl: string): Promise<string[]> {
