@@ -2,6 +2,7 @@ import { Router } from "express";
 import { monitoredAccountController, targetAccountController } from "../controllers/accountControllers.js";
 import { dashboardController } from "../controllers/dashboardController.js";
 import { jobController } from "../controllers/jobController.js";
+import { postController } from "../controllers/postController.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const apiRouter = Router();
@@ -20,6 +21,7 @@ apiRouter.put("/target-accounts/:id", asyncHandler(targetAccountController.updat
 apiRouter.delete("/target-accounts/:id", asyncHandler(targetAccountController.remove));
 
 apiRouter.get("/posts", asyncHandler(dashboardController.posts));
+apiRouter.post("/posts/track", asyncHandler(postController.track));
 apiRouter.get("/posts/:id/status", asyncHandler(dashboardController.postStatus));
 
 apiRouter.post("/jobs/discover-posts", asyncHandler(jobController.discoverPosts));

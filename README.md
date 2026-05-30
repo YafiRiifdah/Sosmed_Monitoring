@@ -231,6 +231,7 @@ Target accounts:
 Posts:
 
 - `GET /api/posts`
+- `POST /api/posts/track`
 - `GET /api/posts/:id/status`
 
 Jobs:
@@ -253,6 +254,8 @@ Worker functions:
 - `fetchPostEngagement(postId)`
 - `recalculatePostStatus(postId)`
 - `recalculateAllScores()`
+
+Untuk akun target yang memiliki ratusan post, gunakan `POST /api/posts/track` dengan URL post tertentu. Dengan cara ini admin tidak perlu discovery seluruh timeline; post yang dipilih langsung masuk `instagram_posts` dan bisa diproses oleh `POST /api/jobs/fetch-engagements` menggunakan `postId`.
 
 BullMQ job behavior:
 
