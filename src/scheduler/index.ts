@@ -3,6 +3,11 @@ import { jobService } from "../services/jobService.js";
 import { logger } from "../utils/logger.js";
 
 function schedule(name: string, intervalMs: number, handler: () => Promise<unknown>) {
+  if (intervalMs <= 0) {
+    logger.info(`Scheduler ${name} is disabled (interval <= 0)`);
+    return;
+  }
+
   const run = async () => {
     try {
       logger.info(`Scheduler running ${name}`);

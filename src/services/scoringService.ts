@@ -1,10 +1,11 @@
 import { EngagementType, PostStatus } from "@prisma/client";
 import { prisma } from "../database/prisma.js";
 
-function toStatus(hasLiked: boolean, hasCommented: boolean) {
+function toStatus(hasLiked: boolean, hasCommented: boolean, likeUnavailable: boolean) {
   if (hasLiked && hasCommented) return PostStatus.COMPLETE;
   if (hasLiked) return PostStatus.LIKE_ONLY;
   if (hasCommented) return PostStatus.COMMENT_ONLY;
+  if (likeUnavailable) return PostStatus.LIKE_UNAVAILABLE;
   return PostStatus.MISSING;
 }
 
@@ -29,6 +30,8 @@ export const scoringService = {
         const likeScore = hasLiked ? 1 : 0;
         const commentScore = hasCommented ? 3 : 0;
 
+        const likeUnavailable = post.likeFetchStatus === "UNAVAILABLE";
+
         return prisma.accountPostStatus.upsert({
           where: {
             postId_monitoredAccountId: {
@@ -42,7 +45,7 @@ export const scoringService = {
             likeScore,
             commentScore,
             totalScore: likeScore + commentScore,
-            status: toStatus(hasLiked, hasCommented)
+            status: toStatus(hasLiked, hasCommented, likeUnavailable)
           },
           create: {
             postId: post.id,
@@ -52,7 +55,7 @@ export const scoringService = {
             likeScore,
             commentScore,
             totalScore: likeScore + commentScore,
-            status: toStatus(hasLiked, hasCommented)
+            status: toStatus(hasLiked, hasCommented, likeUnavailable)
           }
         });
       })

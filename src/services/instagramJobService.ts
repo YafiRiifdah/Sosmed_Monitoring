@@ -1,4 +1,4 @@
-import { EngagementType, ScrapeJobStatus } from "@prisma/client";
+import { EngagementType, LikeFetchStatus, ScrapeJobStatus } from "@prisma/client";
 import { env } from "../config/env.js";
 import { prisma } from "../database/prisma.js";
 import { InstagramScraper, type PostMetadata } from "../scraping/InstagramScraper.js";
@@ -48,6 +48,7 @@ export const instagramJobService = {
   async fetchPostEngagement(postId?: string) {
     const posts = await prisma.instagramPost.findMany({
       where: postId ? { id: postId } : { engagementFetchedAt: null },
+      include: { targetAccount: true },
       orderBy: [{ postedAt: "desc" }, { createdAt: "desc" }],
       take: postId ? undefined : env.AUTO_FETCH_POST_LIMIT
     });
@@ -56,13 +57,21 @@ export const instagramJobService = {
       postCount: posts.length,
       autoFetchLimit: env.AUTO_FETCH_POST_LIMIT
     });
+    const monitoredUsernames = new Set(
+      (
+        await prisma.monitoredAccount.findMany({
+          where: { isActive: true },
+          select: { username: true }
+        })
+      ).map((account) => account.username.toLowerCase())
+    );
 
     const scraper = new InstagramScraper();
     try {
       await scraper.loadSession();
       for (const [index, post] of posts.entries()) {
         logger.info("Fetching Instagram engagement for post", { postId: post.id, postUrl: post.postUrl });
-        const metadata: PostMetadata = await scraper.fetchPostMetadata(post.postUrl).catch((error): PostMetadata => {
+        const metadata: PostMetadata = await scraper.fetchPostMetadata(post.postUrl, post.targetAccount.username).catch((error): PostMetadata => {
           logger.warn("Failed to fetch Instagram post metadata", {
             postId: post.id,
             error: error instanceof Error ? error.message : error
@@ -79,7 +88,7 @@ export const instagramJobService = {
           });
         }
 
-        const { likes, comments, warnings } = await scraper.fetchEngagement(post.postUrl);
+        const { likes, comments, likeFetchUnavailable, warnings } = await scraper.fetchEngagement(post.postUrl, post.targetAccount.username);
         for (const warning of warnings) {
           logger.warn("Instagram engagement extraction warning", { postId: post.id, warning });
         }
@@ -87,10 +96,24 @@ export const instagramJobService = {
           postId: post.id,
           likes: likes.length,
           comments: comments.length,
+          likeFetchUnavailable,
           warnings: warnings.length
         });
 
-        for (const username of likes) {
+        const matchedLikes = likes.filter((username) => monitoredUsernames.has(username.toLowerCase()));
+        const matchedComments = comments.filter((comment) => monitoredUsernames.has(comment.username.toLowerCase()));
+
+        logger.info("Matched monitored account engagements", {
+          postId: post.id,
+          matchedLikes: matchedLikes.length,
+          matchedComments: matchedComments.length,
+          matchedLikeUsernames: matchedLikes,
+          matchedCommentUsernames: matchedComments.map((comment) => comment.username)
+        });
+
+        await prisma.engagement.deleteMany({ where: { postId: post.id } });
+
+        for (const username of matchedLikes) {
           const normalizedUsername = username.toLowerCase();
           await prisma.engagement.upsert({
             where: {
@@ -111,7 +134,7 @@ export const instagramJobService = {
           });
         }
 
-        for (const comment of comments) {
+        for (const comment of matchedComments) {
           const normalizedUsername = comment.username.toLowerCase();
           await prisma.engagement.upsert({
             where: {
@@ -134,7 +157,10 @@ export const instagramJobService = {
 
         await prisma.instagramPost.update({
           where: { id: post.id },
-          data: { engagementFetchedAt: new Date() }
+          data: {
+            engagementFetchedAt: new Date(),
+            likeFetchStatus: likeFetchUnavailable ? LikeFetchStatus.UNAVAILABLE : LikeFetchStatus.AVAILABLE
+          }
         });
         await scoringService.recalculatePostStatus(post.id);
         if (index < posts.length - 1 && env.SCRAPE_DELAY_MS > 0) {

@@ -5,5 +5,7 @@ dist/
 storage_state.json
 session/storage_state.json
 debug/
+debug_*.png
+debug_*.html
 *.log
 npm-debug.log*

@@ -97,8 +97,19 @@ Status engagement per post:
 
 Copy file example:
 
+Di Linux / macOS / Git Bash:
 ```bash
 cp .env.example .env
+```
+
+Di Windows Command Prompt (cmd):
+```cmd
+copy .env.example .env
+```
+
+Di Windows PowerShell:
+```powershell
+Copy-Item .env.example .env
 ```
 
 Isi environment:
@@ -116,6 +127,11 @@ SCRAPE_DELAY_MS=5000
 SCHEDULER_DISCOVER_CRON_MS=900000
 SCHEDULER_ENGAGEMENT_CRON_MS=1200000
 SCHEDULER_SCORING_CRON_MS=600000
+
+# RapidAPI Config (Optional Hybrid Fallback for Likes)
+RAPIDAPI_KEY=your_rapidapi_key
+RAPIDAPI_HOST=instagram-api-fast-reliable-data-scraper.p.rapidapi.com
+RAPIDAPI_LIKES_URL=https://instagram-api-fast-reliable-data-scraper.p.rapidapi.com/media_likers
 ```
 
 ## Setup Supabase

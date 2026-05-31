@@ -16,7 +16,14 @@ enum PostStatus {
   COMPLETE
   LIKE_ONLY
   COMMENT_ONLY
+  LIKE_UNAVAILABLE
   MISSING
+}
+
+enum LikeFetchStatus {
+  UNKNOWN
+  AVAILABLE
+  UNAVAILABLE
 }
 
 enum ScrapeJobType {
@@ -63,6 +70,7 @@ model InstagramPost {
   caption         String?
   postedAt        DateTime?           @map("posted_at")
   engagementFetchedAt DateTime?       @map("engagement_fetched_at")
+  likeFetchStatus LikeFetchStatus      @default(UNKNOWN) @map("like_fetch_status")
   isManuallyTracked Boolean           @default(false) @map("is_manually_tracked")
   createdAt       DateTime            @default(now()) @map("created_at")
   targetAccount   TargetAccount       @relation(fields: [targetAccountId], references: [id], onDelete: Cascade)

@@ -17,7 +17,12 @@ const schema = z.object({
   SCRAPE_DEBUG_DIR: z.string().default("./debug"),
   SCHEDULER_DISCOVER_CRON_MS: z.coerce.number().default(15 * 60 * 1000),
   SCHEDULER_ENGAGEMENT_CRON_MS: z.coerce.number().default(20 * 60 * 1000),
-  SCHEDULER_SCORING_CRON_MS: z.coerce.number().default(10 * 60 * 1000)
+  SCHEDULER_SCORING_CRON_MS: z.coerce.number().default(10 * 60 * 1000),
+  
+  // RapidAPI Config (Optional Hybrid Fallback for Likes)
+  RAPIDAPI_KEY: z.string().optional(),
+  RAPIDAPI_HOST: z.string().default("instagram-scraper-api2.p.rapidapi.com"),
+  RAPIDAPI_LIKES_URL: z.string().default("https://instagram-scraper-api2.p.rapidapi.com/v1/likes")
 });
 
 export const env = schema.parse(process.env);

@@ -48,6 +48,7 @@ export const dashboardService = {
         caption: post.caption,
         postedAt: post.postedAt,
         engagementFetchedAt: post.engagementFetchedAt,
+        likeFetchStatus: post.likeFetchStatus,
         isManuallyTracked: post.isManuallyTracked,
         targetAccount: post.targetAccount,
         engagementPercentage: total === 0 ? 0 : Math.round((complete / total) * 100)
@@ -75,6 +76,7 @@ export const dashboardService = {
         displayName: status.monitoredAccount.displayName,
         liked: status.hasLiked,
         commented: status.hasCommented,
+        likeFetchStatus: post.likeFetchStatus,
         score: status.totalScore,
         status: status.status,
         updatedAt: status.updatedAt
