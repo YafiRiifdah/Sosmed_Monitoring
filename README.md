@@ -92,8 +92,19 @@ frontend/
 
 Copy file example:
 
+Di Linux / macOS / Git Bash:
 ```bash
 cp .env.example .env
+```
+
+Di Windows Command Prompt (cmd):
+```cmd
+copy .env.example .env
+```
+
+Di Windows PowerShell:
+```powershell
+Copy-Item .env.example .env
 ```
 
 Isi environment:

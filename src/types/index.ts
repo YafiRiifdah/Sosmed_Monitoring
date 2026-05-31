@@ -23,6 +23,7 @@ export type PostSummary = {
   caption?: string | null;
   postedAt?: string | null;
   engagementFetchedAt?: string | null;
+  likeFetchStatus?: "UNKNOWN" | "AVAILABLE" | "UNAVAILABLE";
   isManuallyTracked: boolean;
   targetAccount: Account;
   engagementPercentage: number;
@@ -39,7 +40,7 @@ export type ScrapeJob = {
   updatedAt: string;
 };
 
-export type PostStatus = "COMPLETE" | "LIKE_ONLY" | "COMMENT_ONLY" | "MISSING";
+export type PostStatus = "COMPLETE" | "LIKE_ONLY" | "COMMENT_ONLY" | "LIKE_UNAVAILABLE" | "MISSING";
 
 export type PostStatusRow = {
   id: string;
@@ -47,6 +48,7 @@ export type PostStatusRow = {
   displayName?: string | null;
   liked: boolean;
   commented: boolean;
+  likeFetchStatus?: "UNKNOWN" | "AVAILABLE" | "UNAVAILABLE";
   score: number;
   status: PostStatus;
   updatedAt: string;
