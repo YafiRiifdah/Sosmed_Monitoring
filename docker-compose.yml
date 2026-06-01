@@ -23,6 +23,7 @@ services:
       - redis
     volumes:
       - ./session:/app/session:ro
+      - ./debug:/app/debug
 
   worker:
     build:

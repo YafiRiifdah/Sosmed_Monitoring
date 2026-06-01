@@ -9,3 +9,5 @@ debug_*.png
 debug_*.html
 *.log
 npm-debug.log*
+accounts/accounts_secure.json
+

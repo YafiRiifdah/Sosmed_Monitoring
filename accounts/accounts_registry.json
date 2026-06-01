@@ -1,0 +1,42 @@
+[
+  {
+    "id": "rapidapi-01",
+    "provider": "rapidapi",
+    "accountName": "Yafi (Utama)",
+    "email": "yafilala2@gmail.com",
+    "apiKeyMasked": "f724...e0c1",
+    "createdAt": "2026-05-28",
+    "status": "active",
+    "notes": "Akun utama saat ini yang terhubung ke backend. Kuota gratis 100 request/bulan."
+  },
+  {
+    "id": "rapidapi-02",
+    "provider": "rapidapi",
+    "accountName": "RapidAPI Farm 02 (Ternak)",
+    "email": "farm02@example.com",
+    "apiKeyMasked": "f724...e0c2",
+    "createdAt": "2026-06-01",
+    "status": "inactive",
+    "notes": "Siap digunakan ketika akun utama habis kuota (Limit Reset: Tanggal 1 setiap bulan)."
+  },
+  {
+    "id": "apify-01",
+    "provider": "apify",
+    "accountName": "Apify Utama (Pribadi)",
+    "email": "yafilala2@gmail.com",
+    "apiKeyMasked": "apif...ere1",
+    "createdAt": "2026-05-30",
+    "status": "inactive",
+    "notes": "Akun Apify utama dengan free credit $5.00/bulan untuk fallback tingkat kedua."
+  },
+  {
+    "id": "apify-02",
+    "provider": "apify",
+    "accountName": "Apify Farm 02 (Ternak)",
+    "email": "farm02@example.com",
+    "apiKeyMasked": "apif...ere2",
+    "createdAt": "2026-06-01",
+    "status": "inactive",
+    "notes": "Akun Apify cadangan untuk penanganan load tinggi."
+  }
+]

@@ -22,7 +22,10 @@ const schema = z.object({
   // RapidAPI Config (Optional Hybrid Fallback for Likes)
   RAPIDAPI_KEY: z.string().optional(),
   RAPIDAPI_HOST: z.string().default("instagram-scraper-api2.p.rapidapi.com"),
-  RAPIDAPI_LIKES_URL: z.string().default("https://instagram-scraper-api2.p.rapidapi.com/v1/likes")
+  RAPIDAPI_LIKES_URL: z.string().default("https://instagram-scraper-api2.p.rapidapi.com/v1/likes"),
+
+  // JWT Security
+  JWT_SECRET: z.string().default("super-secret-key-12345678-engage-monitor")
 });
 
 export const env = schema.parse(process.env);

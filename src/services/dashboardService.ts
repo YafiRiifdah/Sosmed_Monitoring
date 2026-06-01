@@ -1,5 +1,6 @@
 import { EngagementType, PostStatus } from "@prisma/client";
 import { prisma } from "../database/prisma.js";
+import { getApiKeyUsage } from "../utils/apiUsage.js";
 
 export const dashboardService = {
   async getOverview() {
@@ -19,13 +20,16 @@ export const dashboardService = {
       prisma.accountPostStatus.count()
     ]);
 
+    const apiUsage = await getApiKeyUsage().catch(() => []);
+
     return {
       totalTargetAccounts,
       totalPosts,
       totalMonitoredAccounts,
       totalCompletedEngagement: completed,
       totalIncompleteEngagement: incomplete,
-      completionPercentage: totalStatuses === 0 ? 0 : Math.round((completed / totalStatuses) * 100)
+      completionPercentage: totalStatuses === 0 ? 0 : Math.round((completed / totalStatuses) * 100),
+      apiUsage
     };
   },
 

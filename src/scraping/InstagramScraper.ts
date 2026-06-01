@@ -4,6 +4,7 @@ import path from "node:path";
 import { chromium, type Browser, type BrowserContext, type Page, type Response } from "playwright";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
+import { updateApiKeyUsage, getActiveApiKey } from "../utils/apiUsage.js";
 
 export type DiscoveredPost = {
   instagramPostId: string;
@@ -190,8 +191,9 @@ export class InstagramScraper {
   }
 
   async fetchLikes(postUrl: string, targetUsername?: string): Promise<LikesResult> {
-    // If RapidAPI is configured, try it first for extremely fast and stable likes extraction
-    if (env.RAPIDAPI_KEY) {
+    // Dynamically retrieve the currently active RapidAPI key
+    const activeKey = await getActiveApiKey("rapidapi");
+    if (activeKey) {
       try {
         const postId = this.extractPostId(postUrl);
         let url = "";
@@ -206,10 +208,22 @@ export class InstagramScraper {
         const response = await fetch(url, {
           method: "GET",
           headers: {
-            "x-rapidapi-key": env.RAPIDAPI_KEY,
+            "x-rapidapi-key": activeKey,
             "x-rapidapi-host": env.RAPIDAPI_HOST
           }
         });
+
+        // Track and save API limit usage headers
+        const remainingHeader = response.headers.get("x-ratelimit-requests-remaining");
+        const limitHeader = response.headers.get("x-ratelimit-requests-limit");
+        const resetHeader = response.headers.get("x-ratelimit-requests-reset");
+        if (remainingHeader && limitHeader) {
+          const remaining = parseInt(remainingHeader, 10);
+          const limit = parseInt(limitHeader, 10);
+          const resetSeconds = resetHeader ? parseInt(resetHeader, 10) : undefined;
+          await updateApiKeyUsage(activeKey, limit, remaining, resetSeconds).catch(() => undefined);
+        }
+
         if (response.ok) {
           const body = await response.json();
           const usernames = this.extractUsernamesFromUnknown(body);
