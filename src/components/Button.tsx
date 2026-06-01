@@ -1,4 +1,5 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ReactNode, ButtonHTMLAttributes } from "react";
+import { motion } from "framer-motion";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   icon?: ReactNode;
@@ -13,12 +14,17 @@ export function Button({ icon, children, variant = "primary", className = "", ..
   };
 
   return (
-    <button
-      className={`inline-flex h-10 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
-      {...props}
+    <motion.button
+      whileHover={props.disabled ? undefined : { scale: 1.02 }}
+      whileTap={props.disabled ? undefined : { scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+      className={`inline-flex h-10 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
+      {...(props as any)}
     >
       {icon}
       {children}
-    </button>
+    </motion.button>
   );
 }
+
+

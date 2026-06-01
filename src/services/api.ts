@@ -1,10 +1,11 @@
-import type { Account, Overview, PostDetail, PostSummary, RankingRow, ScrapeJob } from "../types";
+import type { Account, Overview, PostDetail, PostSummary, RankingRow, ScrapeJob, User } from "../types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     cache: "no-store",
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...options?.headers },
     ...options
   });
@@ -21,6 +22,16 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 const json = (body: unknown) => JSON.stringify(body);
 
 export const api = {
+  login: (data: { identifier: string; password: string }) => request<User>("/api/auth/login", { method: "POST", body: json(data) }),
+  logout: () => request<void>("/api/auth/logout", { method: "POST" }),
+  me: () => request<User>("/api/auth/me"),
+
+  adminListUsers: () => request<User[]>("/api/admin/users"),
+  adminCreateUser: (data: any) => request<User>("/api/admin/users", { method: "POST", body: json(data) }),
+  adminDeleteUser: (id: string) => request<void>(`/api/admin/users/${id}`, { method: "DELETE" }),
+
+  addApiKey: (data: any) => request<any>("/api/accounts/api-keys", { method: "POST", body: json(data) }),
+
   overview: () => request<Overview>("/api/overview"),
   ranking: () => request<RankingRow[]>("/api/ranking"),
   posts: () => request<PostSummary[]>("/api/posts"),

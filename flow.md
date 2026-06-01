@@ -156,3 +156,50 @@ Sistem membandingkan semua daftar penilai (likes & comments) yang berhasil dieks
 ### Langkah 6: Perhitungan Skor Akhir & Pembaruan Dashboard
 * `scoringService` mendeteksi data interaksi baru, menghitung bobot nilai (Like = 1, Comment = 3), memperbarui status pencapaian (`COMPLETE`, `COMMENT_ONLY`, dll.), dan menyimpannya ke tabel `PostStatus`.
 * Dashboard frontend langsung menampilkan status interaksi terbaru beserta indikator warna status masing-masing anggota.
+
+---
+
+## 🔄 Rencana Masa Depan: Optimalisasi & Skalabilitas Sistem Scraping
+
+Untuk mendukung pemantauan berskala besar secara gratis selamanya dengan tingkat stabilitas 100%, kami telah merancang rencana arsitektur tingkat tinggi berbasis ide orisinal Anda:
+
+### 1. Rotasi API Key Otomatis (RapidAPI)
+*   **Konsep**: Mendaftarkan banyak API Key gratisan di `.env` yang dipisahkan dengan koma:
+    ```env
+    RAPIDAPI_KEY=key_akun_1,key_akun_2,key_akun_3,key_akun_4
+    ```
+*   **Mekanisme**: Scraper memproses array kunci secara berurutan (*Sequential Fallback*). Jika kunci saat ini mengembalikan status `403` atau `429` (kehabisan kuota 100 request), scraper langsung beralih menggunakan kunci berikutnya di detik yang sama tanpa memotong proses crawling.
+
+### 2. Rantai Cadangan 3-Tingkat (RapidAPI + Apify + Playwright Failover)
+*   **Konsep**: Menggabungkan dua penyedia API scraping berbayar (RapidAPI dan Apify) secara bergantian berbasis prioritas, dengan browser lokal sebagai pertahanan terakhir.
+*   **Alur Kerja**:
+    ```text
+    [Mulai Crawling Likes]
+              │
+    Coba Jalur 1: RapidAPI (Dihitung per Request - Prioritas Utama)
+              │
+      ┌───────┴───────┐
+    Sukses          Gagal / Habis Kuota
+      │               │
+      ▼               ▼
+    Selesai         Coba Jalur 2: Apify Scraper (Dihitung per Liker - Cadangan)
+                      │
+              ┌───────┴───────┐
+            Sukses          Gagal / Habis Kredit
+              │               │
+              ▼               ▼
+            Selesai         Jalur 3: Playwright Local (Gratis - Pertahanan Terakhir)
+    ```
+*   **Keuntungan**:
+    *   **Uptime Terjamin**: Menghindari kegagalan jika salah satu penyedia API mengalami *downtime*.
+    *   **Nol Biaya (Zero Cost)**: Menguras kuota gratis bulanan RapidAPI dahulu, kemudian kuota kredit gratis $5.00 Apify, dan barulah menggunakan Playwright lokal. Semua berjalan otomatis secara gratis!
+
+### 3. Dashboard Monitor Kredit & Pemakaian API (API Credit Monitor Widget)
+*   **Konsep**: Menampilkan sisa kuota dan status pemakaian API dari RapidAPI dan Apify secara visual langsung di Dashboard Utama Admin (Overview) tanpa perlu login ke konsol eksternal.
+*   **Dukungan Skala Banyak Akun (Multi-Account / Key Pooling)**:
+    Jika admin mendaftarkan banyak akun gratisan di `.env` untuk melakukan rotasi, sistem akan mengelola dan menggabungkan datanya secara cerdas menggunakan tabel database relasional **`ApiKeyStatus`**:
+    *   **RapidAPI (Multi-Key Caching)**:
+        Setiap kali scraper selesai berjalan menggunakan salah satu kunci dari array, backend menangkap header respon `X-RateLimit-Requests-Remaining` kunci tersebut, lalu memperbarui sisa kuota khusus untuk baris kunci tersebut di database. Di Dashboard utama, sisa kuota akan dijumlahkan (*SUM*) dari semua kunci aktif (misal: `Total: 242 / 400 Requests` dari 4 akun aktif).
+    *   **Apify (Multi-Token Query)**:
+        Backend melakukan query berkala (secara background loop) ke REST API resmi Apify untuk setiap token akun yang terdaftar, mengambil sisa saldo kredit gratis dari masing-masing akun, dan menggabungkannya sebagai total saldo gabungan (misal: `$11.20 / $15.00` dari 3 akun Apify aktif).
+*   **Keuntungan**: Admin memiliki transparansi penuh terhadap status kesehatan dan masa aktif kuota dari puluhan akun gratisan secara terpusat langsung dari layar lokal, mempermudah manajemen kapasitas tanpa pusing memantau konsol eksternal.

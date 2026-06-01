@@ -1,3 +1,13 @@
+export type UserRole = "SUPER_ADMIN" | "ADMIN";
+
+export type User = {
+  id: string;
+  email: string;
+  username: string;
+  role: UserRole;
+  createdAt?: string;
+};
+
 export type Account = {
   id: string;
   username: string;
@@ -7,6 +17,14 @@ export type Account = {
   createdAt: string;
 };
 
+export type ApiKeyUsage = {
+  key: string;
+  limit: number;
+  remaining: number;
+  resetAt?: string;
+  updatedAt: string;
+};
+
 export type Overview = {
   totalTargetAccounts: number;
   totalPosts: number;
@@ -14,6 +32,7 @@ export type Overview = {
   totalCompletedEngagement: number;
   totalIncompleteEngagement: number;
   completionPercentage: number;
+  apiUsage?: ApiKeyUsage[];
 };
 
 export type PostSummary = {

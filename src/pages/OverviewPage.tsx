@@ -2,6 +2,7 @@ import { Activity, CheckCircle2, DownloadCloud, Percent, Play, RefreshCw, Users 
 import { useCallback, useState } from "react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
+import { Skeleton } from "../components/Skeleton";
 import { api } from "../services/api";
 import { useAsync } from "../hooks/useAsync";
 
@@ -45,28 +46,42 @@ export function OverviewPage() {
       {jobMessage && <div className="rounded-md border border-teal-200 bg-teal-50 p-3 text-sm text-teal-700">{jobMessage}</div>}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {cards.map((card) => (
-          <Card key={card.label}>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-slate-500">{card.label}</div>
-                <div className="mt-2 text-3xl font-semibold">{loading ? "-" : card.value}</div>
+        {loading ? (
+          <Skeleton variant="card" count={6} />
+        ) : (
+          cards.map((card) => (
+            <Card key={card.label}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-slate-500">{card.label}</div>
+                  <div className="mt-2 text-3xl font-semibold">{card.value}</div>
+                </div>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-md bg-mist ${card.tone}`}>{card.icon}</div>
               </div>
-              <div className={`flex h-10 w-10 items-center justify-center rounded-md bg-mist ${card.tone}`}>{card.icon}</div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          ))
+        )}
       </div>
 
-      <Card>
-        <div className="mb-2 flex items-center justify-between text-sm">
-          <span className="font-medium">Completion percentage</span>
-          <span>{data?.completionPercentage ?? 0}%</span>
-        </div>
-        <div className="h-3 overflow-hidden rounded-md bg-slate-200">
-          <div className="h-full bg-teal-600 transition-all" style={{ width: `${data?.completionPercentage ?? 0}%` }} />
-        </div>
-      </Card>
+      {loading ? (
+        <Card className="animate-shimmer min-h-[56px] border-slate-100">
+          <div className="opacity-0 space-y-2">
+            <div className="h-4 w-24 bg-slate-200 rounded" />
+            <div className="h-3 w-full bg-slate-200 rounded" />
+          </div>
+        </Card>
+      ) : (
+        <Card>
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span className="font-medium">Completion percentage</span>
+            <span>{data?.completionPercentage ?? 0}%</span>
+          </div>
+          <div className="h-3 overflow-hidden rounded-md bg-slate-200">
+            <div className="h-full bg-teal-600 transition-all" style={{ width: `${data?.completionPercentage ?? 0}%` }} />
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
+
