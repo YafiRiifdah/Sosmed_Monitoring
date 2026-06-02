@@ -1,10 +1,15 @@
 import type { PostStatus } from "../types";
+import { UiBadge } from "./ui/badge";
+
+const statusTone: Record<PostStatus, "complete" | "likeOnly" | "commentOnly" | "likeUnavailable" | "missing"> = {
+  COMPLETE: "complete",
+  LIKE_ONLY: "likeOnly",
+  COMMENT_ONLY: "commentOnly",
+  LIKE_UNAVAILABLE: "likeUnavailable",
+  MISSING: "missing"
+};
 
 export function StatusBadge({ status }: { status: PostStatus }) {
   const label = status.replace("_", " ");
-  return (
-    <span className={`inline-flex min-w-24 justify-center rounded-md border px-2 py-1 text-xs font-semibold status-${status.toLowerCase()}`}>
-      {label}
-    </span>
-  );
+  return <UiBadge tone={statusTone[status]}>{label}</UiBadge>;
 }

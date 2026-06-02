@@ -9,51 +9,70 @@ export function RankingPage() {
   const { data, loading, error, reload } = useAsync(useCallback(() => api.ranking(), []));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 text-[var(--text-muted)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold">Ranking</h1>
+        <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">Ranking</h1>
         <Button onClick={() => void reload()} variant="ghost">Refresh</Button>
       </div>
-      {error && <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>}
-      {loading ? <div className="text-sm text-slate-500">Loading...</div> : null}
-      {!loading && (data ?? []).length === 0 ? <EmptyState message="No ranking data yet." /> : null}
-      <div className="overflow-hidden rounded-md border border-line bg-white">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="bg-mist text-xs uppercase text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Rank</th>
-              <th className="px-4 py-3">Username</th>
-              <th className="px-4 py-3">Likes</th>
-              <th className="px-4 py-3">Comments</th>
-              <th className="px-4 py-3">Score</th>
-              <th className="px-4 py-3">Completion</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data ?? []).map((row, index) => (
-              <tr key={row.id} className="border-t border-line">
-                <td className="px-4 py-3">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-mist font-semibold">
-                    {index < 3 ? <Medal size={16} className={index === 0 ? "text-amber-700" : "text-slate-500"} /> : index + 1}
-                  </span>
-                </td>
-                <td className="px-4 py-3 font-medium">@{row.username}</td>
-                <td className="px-4 py-3">{row.totalLikes}</td>
-                <td className="px-4 py-3">{row.totalComments}</td>
-                <td className="px-4 py-3 font-semibold">{row.totalScore}</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-28 overflow-hidden rounded-md bg-slate-200">
-                      <div className="h-full bg-teal-600" style={{ width: `${row.completionPercentage}%` }} />
-                    </div>
-                    <span>{row.completionPercentage}%</span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+      {error && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
+      {loading ? <div className="text-sm text-[var(--text-subtle)] animate-pulse">Loading ranking...</div> : null}
+      {!loading && (data ?? []).length === 0 ? <EmptyState message="Belum ada data ranking." /> : null}
+
+      {!loading && (data ?? []).length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--surface)]">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead className="bg-[var(--surface-muted)] text-xs uppercase text-[var(--text-subtle)] border-b border-[var(--border-soft)]">
+                <tr>
+                  <th className="px-4 py-3.5">Rank</th>
+                  <th className="px-4 py-3.5">Username</th>
+                  <th className="px-4 py-3.5">Likes</th>
+                  <th className="px-4 py-3.5">Comments</th>
+                  <th className="px-4 py-3.5">Score</th>
+                  <th className="px-4 py-3.5">Completion</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-soft)]">
+                {(data ?? []).map((row, index) => (
+                  <tr key={row.id} className="hover:bg-[var(--surface-hover)] transition-all">
+                    <td className="px-4 py-3">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--surface-muted)] font-semibold text-[var(--text-muted)]">
+                        {index < 3 ? (
+                          <Medal 
+                            size={16} 
+                            className={
+                              index === 0 
+                                ? "text-amber-400" 
+                                : index === 1 
+                                ? "text-slate-300" 
+                                : "text-amber-600/80"
+                            } 
+                          />
+                        ) : (
+                          index + 1
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-[var(--text)]">@{row.username}</td>
+                    <td className="px-4 py-3 text-[var(--text-muted)]">{row.totalLikes}</td>
+                    <td className="px-4 py-3 text-[var(--text-muted)]">{row.totalComments}</td>
+                    <td className="px-4 py-3 font-bold text-sky-400 font-mono">{row.totalScore}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-2.5 w-28 overflow-hidden rounded-full bg-[var(--surface-muted)] p-[1px] border border-[var(--border-soft)]">
+                          <div className="h-full bg-[var(--accent)] rounded-full" style={{ width: `${row.completionPercentage}%` }} />
+                        </div>
+                        <span className="font-semibold text-sky-400 font-mono">{row.completionPercentage}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

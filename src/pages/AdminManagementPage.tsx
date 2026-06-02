@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { UserPlus, Shield, Mail, Lock, User, Trash2, Calendar, CheckCircle2, X, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../components/Button";
+import { Input } from "../components/ui/input";
+import { Dialog } from "../components/ui/dialog";
 import { Card } from "../components/Card";
 import { Skeleton } from "../components/Skeleton";
 import { api } from "../services/api";
@@ -69,12 +71,12 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
   }
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className="space-y-6 font-sans text-[var(--text-muted)]">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Admin Management</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">Admin Management</h1>
+          <p className="text-sm text-[var(--text-subtle)]">
             Kelola hak akses admin dan kontrol pendaftaran akun asisten monitor Anda di sini.
           </p>
         </div>
@@ -93,22 +95,22 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
       </div>
 
       {deleteError && (
-        <div className="rounded-md bg-rose-50 border border-rose-100 p-3 text-xs text-rose-700">
+        <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">
           {deleteError}
         </div>
       )}
 
       {error && (
-        <div className="rounded-md bg-rose-50 border border-rose-100 p-3 text-xs text-rose-700">
+        <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">
           {error}
         </div>
       )}
 
       {/* Full Width Admin List Table Card */}
-      <Card className="p-0 overflow-hidden shadow-sm border border-slate-200">
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <span className="font-bold text-slate-800 text-sm">Daftar Admin Aktif</span>
-          <span className="text-xs font-medium text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">
+      <Card className="p-0 overflow-hidden border border-[var(--border-soft)] bg-[var(--surface)]">
+        <div className="p-4 border-b border-[var(--border-soft)] flex items-center justify-between bg-[var(--surface-muted)]">
+          <span className="font-bold text-[var(--text-muted)] text-sm">Daftar Admin Aktif</span>
+          <span className="text-xs font-semibold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
             {users?.length ?? 0} Pengguna
           </span>
         </div>
@@ -116,14 +118,14 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-400 bg-slate-50/20">
+              <tr className="border-b border-[var(--border-soft)] text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)] bg-[var(--surface-muted)]">
                 <th className="py-3.5 px-4">Username & Email</th>
                 <th className="py-3.5 px-4">Role</th>
                 <th className="py-3.5 px-4">Dibuat Pada</th>
                 <th className="py-3.5 px-4 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[var(--border-soft)]">
               {loading ? (
                 <tr>
                   <td colSpan={4} className="py-8 px-4">
@@ -136,33 +138,33 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                   const isSuper = u.role === "SUPER_ADMIN";
 
                   return (
-                    <tr key={u.id} className="hover:bg-slate-50/40 transition-colors">
+                    <tr key={u.id} className="hover:bg-[var(--surface-hover)] transition-colors">
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-800 flex items-center gap-1.5">
+                        <div className="font-bold text-[var(--text)] flex items-center gap-1.5">
                           @{u.username}
                           {isSelf && (
-                            <span className="text-xxs bg-indigo-50 text-indigo-600 px-1.5 py-0.2 rounded font-normal">
+                            <span className="text-[10px] bg-sky-500/10 text-sky-400 px-1.5 py-0.2 rounded font-semibold border border-sky-500/20">
                               Anda
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-slate-400">{u.email}</div>
+                        <div className="text-xs text-[var(--text-subtle)]">{u.email}</div>
                       </td>
                       <td className="py-3.5 px-4">
                         {isSuper ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-600/10">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-500/20">
                             <Shield size={12} />
                             Super Admin
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-semibold text-slate-400 border border-slate-500/20">
                             Admin
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-500 text-xs">
-                        <div className="flex items-center gap-1">
-                          <Calendar size={12} className="text-slate-400" />
+                      <td className="py-3.5 px-4 text-[var(--text-subtle)] text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={12} className="text-[var(--text-subtle)]" />
                           <span>
                             {u.createdAt ? new Date(u.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}
                           </span>
@@ -173,8 +175,8 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                           type="button"
                           disabled={isSelf || isSuper}
                           onClick={() => void handleDeleteAdmin(u.id, u.username)}
-                          className={`inline-flex h-8 w-8 items-center justify-center rounded-md border text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors ${
-                            isSelf || isSuper ? "opacity-30 cursor-not-allowed border-transparent" : "border-slate-200"
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border text-[var(--text-subtle)] hover:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/30 transition-all ${
+                            isSelf || isSuper ? "opacity-20 cursor-not-allowed border-transparent" : "border-[var(--border)] bg-[var(--surface-muted)] active:scale-95"
                           }`}
                           title={isSelf ? "Anda tidak dapat menghapus diri sendiri" : isSuper ? "Super Admin tidak dapat dihapus" : "Hapus Admin"}
                         >
@@ -186,7 +188,7 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                 })
               ) : (
                 <tr>
-                  <td colSpan={4} className="py-10 text-center text-slate-400 text-xs">
+                  <td colSpan={4} className="py-10 text-center text-[var(--text-subtle)] text-xs">
                     Tidak ada pengguna admin terdaftar.
                   </td>
                 </tr>
@@ -199,132 +201,84 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
       {/* ========================================================================= */}
       {/* GORGEOUS FROSTED GLASS MODAL OVERLAY */}
       {/* ========================================================================= */}
-      {/* ========================================================================= */}
-      {/* GORGEOUS FROSTED GLASS MODAL OVERLAY */}
-      {/* ========================================================================= */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              transition={{ type: "spring", stiffness: 350, damping: 25 }}
-              className="relative w-full max-w-md transform overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl"
+      <Dialog
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Tambah Admin Baru"
+        icon={<UserPlus size={16} />}
+      >
+        <form onSubmit={(e) => void handleCreateAdmin(e)} className="space-y-4">
+          {formError && (
+            <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-xs text-rose-300">
+              {formError}
+            </div>
+          )}
+          {formSuccess && (
+            <div className="rounded-md border border-sky-500/20 bg-sky-500/10 p-3 text-xs text-sky-300 flex items-center gap-1.5">
+              <CheckCircle2 size={14} className="shrink-0" />
+              <span>{formSuccess}</span>
+            </div>
+          )}
+
+          {/* Username Input */}
+          <div className="space-y-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
+              Username
+            </label>
+            <Input
+              type="text"
+              required
+              placeholder="Masukkan username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              icon={<User size={16} />}
+            />
+          </div>
+
+          {/* Email Input */}
+          <div className="space-y-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
+              Email
+            </label>
+            <Input
+              type="email"
+              required
+              placeholder="admin@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              icon={<Mail size={16} />}
+            />
+          </div>
+
+          {/* Password Input */}
+          <div className="space-y-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
+              Password Awal
+            </label>
+            <Input
+              type="password"
+              required
+              placeholder="Min 6 karakter"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              icon={<Lock size={16} />}
+            />
+          </div>
+
+          <div className="pt-2 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 text-xs font-semibold text-[var(--text-subtle)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)] rounded-md transition-colors"
             >
-              
-              {/* Close Button */}
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute right-4 top-4 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors focus:outline-none"
-              >
-                <X size={18} />
-              </button>
-
-              {/* Modal Title */}
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-teal-50 text-teal-600">
-                  <UserPlus size={16} />
-                </div>
-                <h2 className="text-base font-bold text-slate-800">Tambah Admin Baru</h2>
-              </div>
-
-              {/* Form */}
-              <form onSubmit={(e) => void handleCreateAdmin(e)} className="space-y-4">
-                {formError && (
-                  <div className="rounded-md bg-rose-50 border border-rose-100 p-3 text-xs text-rose-700">
-                    {formError}
-                  </div>
-                )}
-                {formSuccess && (
-                  <div className="rounded-md bg-emerald-50 border border-emerald-100 p-3 text-xs text-emerald-700 flex items-center gap-1.5">
-                    <CheckCircle2 size={14} className="shrink-0" />
-                    <span>{formSuccess}</span>
-                  </div>
-                )}
-
-                {/* Username Input */}
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Username
-                  </label>
-                  <div className="relative rounded-md bg-slate-50 focus-within:ring-2 focus-within:ring-teal-500/20 focus-within:bg-white transition-all">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                      <User size={16} />
-                    </div>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Masukkan username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="w-full rounded-md border border-slate-200 bg-transparent py-2 pl-9 pr-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-400"
-                    />
-                  </div>
-                </div>
-
-                {/* Email Input */}
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Email
-                  </label>
-                  <div className="relative rounded-md bg-slate-50 focus-within:ring-2 focus-within:ring-teal-500/20 focus-within:bg-white transition-all">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                      <Mail size={16} />
-                    </div>
-                    <input
-                      type="email"
-                      required
-                      placeholder="admin@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-md border border-slate-200 bg-transparent py-2 pl-9 pr-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-400"
-                    />
-                  </div>
-                </div>
-
-                {/* Password Input */}
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Password Awal
-                  </label>
-                  <div className="relative rounded-md bg-slate-50 focus-within:ring-2 focus-within:ring-teal-500/20 focus-within:bg-white transition-all">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                      <Lock size={16} />
-                    </div>
-                    <input
-                      type="password"
-                      required
-                      placeholder="Min 6 karakter"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full rounded-md border border-slate-200 bg-transparent py-2 pl-9 pr-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-400"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 rounded-md transition-colors"
-                  >
-                    Batal
-                  </button>
-                  <Button type="submit" disabled={formLoading}>
-                    {formLoading ? "Membuat..." : "Simpan Admin"}
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              Batal
+            </button>
+            <Button type="submit" disabled={formLoading}>
+              {formLoading ? "Membuat..." : "Simpan Admin"}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 }

@@ -13,10 +13,10 @@ export function Skeleton({ variant = "text", count = 1, className = "" }: Skelet
     return (
       <>
         {items.map((_, i) => (
-          <Card key={i} className={`animate-shimmer min-h-[96px] border-slate-100 ${className}`}>
+          <Card key={i} className={`animate-shimmer min-h-[96px] border-[var(--border-soft)] ${className}`}>
             <div className="space-y-3 opacity-0">
-              <div className="h-4 w-24 bg-slate-200 rounded" />
-              <div className="h-8 w-16 bg-slate-200 rounded" />
+              <div className="h-4 w-24 bg-[var(--surface-muted)] rounded" />
+              <div className="h-8 w-16 bg-[var(--surface-muted)] rounded" />
             </div>
           </Card>
         ))}
@@ -28,7 +28,7 @@ export function Skeleton({ variant = "text", count = 1, className = "" }: Skelet
     return (
       <div className="space-y-3">
         {items.map((_, i) => (
-          <div key={i} className={`animate-shimmer h-12 w-full rounded-md border border-slate-100 ${className}`} />
+          <div key={i} className={`animate-shimmer h-12 w-full rounded-md border border-[var(--border-soft)] ${className}`} />
         ))}
       </div>
     );
@@ -48,7 +48,7 @@ export function Skeleton({ variant = "text", count = 1, className = "" }: Skelet
   return (
     <div className="space-y-2.5">
       {items.map((_, i) => (
-        <div key={i} className={`animate-shimmer h-3.5 w-full rounded bg-slate-200 ${className}`} />
+        <div key={i} className={`animate-shimmer h-3.5 w-full rounded bg-[var(--surface-muted)] ${className}`} />
       ))}
     </div>
   );

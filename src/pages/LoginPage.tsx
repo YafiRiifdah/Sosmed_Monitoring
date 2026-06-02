@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Key, Lock, User, Eye, EyeOff, ShieldAlert, ArrowRight } from "lucide-react";
+import { BarChart3, Key, Lock, User, Eye, EyeOff, ShieldAlert, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { api } from "../services/api";
 import type { User as UserType } from "../types";
+import { Input } from "../components/ui/input";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType) => void }) {
   const [identifier, setIdentifier] = useState("");
@@ -27,37 +29,54 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#090d16] px-4 py-12 overflow-hidden font-sans">
-      {/* Background Decorative Glowing Orbs */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.5 }}
-        className="absolute -left-20 -top-20 h-[350px] w-[350px] rounded-full bg-teal-500/10 blur-[80px]" 
-      />
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.5, delay: 0.2 }}
-        className="absolute -right-20 -bottom-20 h-[350px] w-[350px] rounded-full bg-indigo-500/10 blur-[80px]" 
-      />
+    <div className="app-shell relative flex min-h-screen items-center justify-center px-4 py-12 font-sans">
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle compact />
+      </div>
 
-      <div className="relative w-full max-w-md">
-        {/* Logo and Brand Header */}
+      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] shadow-2xl backdrop-blur-xl lg:grid-cols-[1fr_420px]">
+        <section className="hidden min-h-[560px] border-r border-[var(--border-soft)] bg-[var(--surface-muted)] p-8 lg:flex lg:flex-col lg:justify-between">
+          <div>
+            <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm shadow-sky-400/10">
+              <BarChart3 size={24} />
+            </div>
+            <h1 className="max-w-md text-4xl font-semibold leading-tight tracking-tight text-[var(--text)]">
+              Monitoring engagement Instagram untuk tim admin.
+            </h1>
+            <p className="mt-4 max-w-md text-sm leading-6 text-[var(--text-subtle)]">
+              Pantau target, akun wajib PAC, status engagement, dan ranking dari satu dashboard yang lebih tenang untuk dipakai harian.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              ["Like", "+1"],
+              ["Comment", "+3"],
+              ["Status", "Live"]
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-4">
+                <div className="text-xs uppercase tracking-[0.18em] text-[var(--text-subtle)]">{label}</div>
+                <div className="mt-2 text-xl font-semibold text-[var(--text)]">{value}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="p-6 sm:p-8">
+          {/* Logo and Brand Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="mb-8 text-center"
+          className="mb-8 text-center lg:text-left"
         >
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 10 }}
-            className="mx-auto mb-3 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-tr from-teal-400 to-indigo-500 shadow-[0_0_20px_rgba(20,184,166,0.3)]"
+            className="mx-auto mb-3 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl bg-[var(--accent)] shadow-[0_0_20px_rgba(56,189,248,0.15)] lg:mx-0"
           >
-            <Key className="text-white" size={24} />
+            <Key className="text-[var(--accent-contrast)] font-bold" size={24} />
           </motion.div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-white">Engage Monitor</h2>
-          <p className="mt-2 text-sm text-slate-400">Masukkan kredensial admin untuk memantau aktivitas.</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-[var(--text)]">Engage Monitor</h2>
+          <p className="mt-2 text-sm text-[var(--text-subtle)]">Masukkan kredensial admin untuk memantau aktivitas.</p>
         </motion.div>
 
         {/* Glassmorphism Card */}
@@ -65,7 +84,7 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 22, delay: 0.1 }}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 shadow-2xl backdrop-blur-xl"
+          className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-strong)] p-5 shadow-xl backdrop-blur-xl sm:p-6"
         >
           <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
             
@@ -82,49 +101,41 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
 
             {/* Email / Username Input */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
                 Username / Email
               </label>
-              <div className="relative rounded-lg bg-black/20 focus-within:ring-2 focus-within:ring-teal-500/50 transition-all">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                  <User size={18} />
-                </div>
-                <input
-                  type="text"
-                  required
-                  placeholder="Masukkan username atau email"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full rounded-lg border-0 bg-transparent py-3 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0"
-                />
-              </div>
+              <Input
+                type="text"
+                required
+                placeholder="Masukkan username atau email"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                icon={<User size={18} />}
+              />
             </div>
 
             {/* Password Input */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
                 Password
               </label>
-              <div className="relative rounded-lg bg-black/20 focus-within:ring-2 focus-within:ring-teal-500/50 transition-all">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                  <Lock size={18} />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border-0 bg-transparent py-3 pl-10 pr-10 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white transition-colors focus:outline-none"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+              <Input
+                type={showPassword ? "text" : "password"}
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                icon={<Lock size={18} />}
+                rightElement={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-[var(--text-subtle)] hover:text-[var(--text)] transition-colors focus:outline-none flex items-center"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                }
+              />
             </div>
 
             {/* Submit Button */}
@@ -134,10 +145,10 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
               whileHover={loading ? undefined : { scale: 1.01 }}
               whileTap={loading ? undefined : { scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              className="group relative flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-teal-500 to-indigo-500 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 transition-all hover:brightness-110 disabled:opacity-60 disabled:pointer-events-none"
+              className="group relative flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] py-3 text-sm font-bold text-[var(--accent-contrast)] shadow-md shadow-sky-400/5 transition-all hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:pointer-events-none"
             >
               {loading ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--accent-contrast)] border-t-transparent" />
               ) : (
                 <>
                   Masuk Dashboard
@@ -152,14 +163,14 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
         {/* Footer Security Notice */}
         <motion.p 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
+          animate={{ opacity: 0.3 }}
           transition={{ delay: 0.4 }}
-          className="mt-8 text-center text-xs text-slate-600"
+          className="mt-8 text-center text-xs text-[var(--text-subtle)]"
         >
           Sistem Keamanan Terenkripsi. Akses dibatasi khusus untuk admin terdaftar.
         </motion.p>
+        </section>
       </div>
     </div>
   );
 }
-

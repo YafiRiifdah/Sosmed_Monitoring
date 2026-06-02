@@ -1,6 +1,9 @@
 import { ExternalLink, Play, Plus, Search } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "../components/Button";
+import { CustomSelect } from "../components/ui/select";
+import { Input } from "../components/ui/input";
+import { Checkbox } from "../components/ui/checkbox";
 import { EmptyState } from "../components/EmptyState";
 import { useAsync } from "../hooks/useAsync";
 import { api } from "../services/api";
@@ -84,7 +87,7 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
       await api.trackPost({ targetAccountId, postUrl: trackedPostUrl });
       setPostUrl("");
       setQuery(extractInstagramPostId(trackedPostUrl) || trackedPostUrl);
-      setMessage("Post tracked");
+      setMessage("Post tracked successfully");
       await reload();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Failed to track post");
@@ -104,27 +107,22 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 text-[var(--text-muted)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold">Posts</h1>
+        <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">Posts</h1>
         <Button onClick={() => void reload()} variant="ghost">Refresh</Button>
       </div>
-      <form onSubmit={(event) => void submitTrackPost(event)} className="grid gap-3 rounded-md border border-line bg-white p-4 md:grid-cols-[260px_1fr_auto]">
-        <select
-          className="h-10 rounded-md border border-line px-3 text-sm"
+
+      {/* Add Tracked Post Form */}
+      <form onSubmit={(event) => void submitTrackPost(event)} className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 shadow-xl backdrop-blur-xl md:grid-cols-[260px_1fr_auto]">
+        <CustomSelect
           value={targetAccountId}
-          onChange={(event) => setTargetAccountId(event.target.value)}
-          required
-        >
-          <option value="" disabled>Select target</option>
-          {targets.map((target) => (
-            <option key={target.id} value={target.id}>
-              @{target.username}
-            </option>
-          ))}
-        </select>
-        <input
-          className="h-10 rounded-md border border-line px-3 text-sm"
+          onChange={setTargetAccountId}
+          options={targets.map((target) => ({ value: target.id, label: `@${target.username}` }))}
+          placeholder="Select target"
+          className="w-full"
+        />
+        <Input
           placeholder="https://www.instagram.com/p/..."
           value={postUrl}
           onChange={(event) => setPostUrl(event.target.value)}
@@ -132,104 +130,129 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
         />
         <Button icon={<Plus size={16} />} type="submit">Track</Button>
       </form>
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-2.5 text-slate-400" size={17} />
-        <input
-          className="h-10 w-full rounded-md border border-line pl-9 pr-3 text-sm"
-          placeholder="Search posts"
+
+      {/* Search Input */}
+      <div className="max-w-md">
+        <Input
+          placeholder="Cari postingan..."
           value={query}
           onChange={(event) => setQuery(event.target.value)}
+          icon={<Search size={17} />}
         />
       </div>
-      <div className="grid gap-3 rounded-md border border-line bg-white p-4 md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
-        <select
-          className="h-10 rounded-md border border-line px-3 text-sm"
+
+      {/* Filter Options */}
+      <div className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 shadow-xl backdrop-blur-xl md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+        <CustomSelect
           value={targetFilter}
-          onChange={(event) => setTargetFilter(event.target.value)}
-        >
-          <option value="all">All targets</option>
-          {targets.map((target) => (
-            <option key={target.id} value={target.id}>
-              @{target.username}
-            </option>
-          ))}
-        </select>
-        <select
-          className="h-10 rounded-md border border-line px-3 text-sm"
+          onChange={setTargetFilter}
+          options={[
+            { value: "all", label: "All targets" },
+            ...targets.map((target) => ({ value: target.id, label: `@${target.username}` }))
+          ]}
+          placeholder="All targets"
+          className="w-full"
+        />
+        <CustomSelect
           value={completionFilter}
-          onChange={(event) => setCompletionFilter(event.target.value)}
-        >
-          <option value="all">All completion</option>
-          <option value="zero">0%</option>
-          <option value="incomplete">Incomplete</option>
-          <option value="complete">Complete</option>
-        </select>
-        <input className="h-10 rounded-md border border-line px-3 text-sm" type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
-        <input className="h-10 rounded-md border border-line px-3 text-sm" type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
-        <label className="flex h-10 items-center gap-2 text-sm">
-          <input type="checkbox" checked={onlyTracked} onChange={(event) => setOnlyTracked(event.target.checked)} />
-          Manual only
-        </label>
+          onChange={setCompletionFilter}
+          options={[
+            { value: "all", label: "All completion" },
+            { value: "zero", label: "0%" },
+            { value: "incomplete", label: "Incomplete" },
+            { value: "complete", label: "Complete" }
+          ]}
+          placeholder="All completion"
+          className="w-full"
+        />
+        <Input 
+          type="date" 
+          value={dateFrom} 
+          onChange={(event) => setDateFrom(event.target.value)} 
+        />
+        <Input 
+          type="date" 
+          value={dateTo} 
+          onChange={(event) => setDateTo(event.target.value)} 
+        />
+        <Checkbox 
+          checked={onlyTracked} 
+          onChange={(event) => setOnlyTracked(event.target.checked)} 
+          label="Manual Only"
+        />
       </div>
-      {formError && <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{formError}</div>}
-      {message && <div className="rounded-md border border-teal-200 bg-teal-50 p-3 text-sm text-teal-700">{message}</div>}
-      {error && <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>}
-      {loading ? <div className="text-sm text-slate-500">Loading...</div> : null}
-      {!loading && posts.length === 0 ? <EmptyState message="No posts discovered yet." /> : null}
-      <div className="overflow-hidden rounded-md border border-line bg-white">
-        <table className="w-full min-w-[780px] text-left text-sm">
-          <thead className="bg-mist text-xs uppercase text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Target</th>
-              <th className="px-4 py-3">Caption</th>
-              <th className="px-4 py-3">Post Date</th>
-              <th className="px-4 py-3">Engagement</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map((post) => (
-              <tr key={post.id} className="border-t border-line">
-                <td className="px-4 py-3 font-medium">@{post.targetAccount.username}</td>
-                <td className="max-w-md px-4 py-3 text-slate-600">
-                  <span className="line-clamp-2" title={post.caption ?? undefined}>
-                    {formatCaptionPreview(post.caption)}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-slate-600">{post.postedAt ? new Date(post.postedAt).toLocaleDateString() : "-"}</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-28 overflow-hidden rounded-md bg-slate-200">
-                      <div className="h-full bg-teal-600" style={{ width: `${post.engagementPercentage}%` }} />
-                    </div>
-                    <span>{post.engagementPercentage}%</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-end gap-2">
-                    <Button icon={<Play size={15} />} onClick={() => void fetchPost(post)} variant="ghost">Fetch</Button>
-                    {fetchJobs[post.id] && (
-                      <span className={`inline-flex h-10 items-center rounded-md border px-3 text-xs font-semibold ${
-                        fetchJobs[post.id].status === "COMPLETED"
-                          ? "border-teal-200 bg-teal-50 text-teal-700"
-                          : fetchJobs[post.id].status === "FAILED"
-                            ? "border-rose-200 bg-rose-50 text-rose-700"
-                            : "border-amber-200 bg-amber-50 text-amber-700"
-                      }`}>
-                        {fetchJobs[post.id].status.toLowerCase()}
+
+      {formError && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{formError}</div>}
+      {message && <div className="rounded-md border border-sky-500/20 bg-sky-500/10 p-3 text-sm text-sky-300">{message}</div>}
+      {error && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
+      {loading ? <div className="text-sm text-[var(--text-subtle)] animate-pulse">Loading posts...</div> : null}
+      {!loading && posts.length === 0 ? <EmptyState message="Belum ada postingan yang ditemukan." /> : null}
+
+      {!loading && posts.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--surface)]">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[780px] text-left text-sm">
+              <thead className="bg-[var(--surface-muted)] text-xs uppercase text-[var(--text-subtle)] border-b border-[var(--border-soft)]">
+                <tr>
+                  <th className="px-4 py-3.5">Target</th>
+                  <th className="px-4 py-3.5">Caption</th>
+                  <th className="px-4 py-3.5">Post Date</th>
+                  <th className="px-4 py-3.5">Engagement</th>
+                  <th className="px-4 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-soft)]">
+                {posts.map((post) => (
+                  <tr key={post.id} className="hover:bg-[var(--surface-hover)] transition-all">
+                    <td className="px-4 py-3 font-semibold text-[var(--text)]">@{post.targetAccount.username}</td>
+                    <td className="max-w-md px-4 py-3 text-[var(--text-muted)]">
+                      <span className="line-clamp-2" title={post.caption ?? undefined}>
+                        {formatCaptionPreview(post.caption)}
                       </span>
-                    )}
-                    <Button onClick={() => onOpenPost(post)} variant="ghost">Status</Button>
-                    <a className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-3 text-sm font-medium text-ink" href={post.postUrl} target="_blank" rel="noreferrer">
-                      <ExternalLink size={16} />
-                    </a>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    </td>
+                    <td className="px-4 py-3 text-[var(--text-subtle)]">{post.postedAt ? new Date(post.postedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-2.5 w-28 overflow-hidden rounded-full bg-[var(--surface-muted)] p-[1px] border border-[var(--border-soft)]">
+                          <div className="h-full bg-[var(--accent)] rounded-full" style={{ width: `${post.engagementPercentage}%` }} />
+                        </div>
+                        <span className="font-semibold text-sky-400 font-mono">{post.engagementPercentage}%</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end items-center gap-2">
+                        <Button icon={<Play size={15} />} onClick={() => void fetchPost(post)} variant="ghost">Fetch</Button>
+                        
+                        {fetchJobs[post.id] && (
+                          <span className={`inline-flex h-10 items-center rounded-md border px-3 text-xs font-semibold ${
+                            fetchJobs[post.id].status === "COMPLETED"
+                              ? "border-sky-500/20 bg-sky-500/10 text-sky-400"
+                              : fetchJobs[post.id].status === "FAILED"
+                                ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
+                                : "border-amber-500/20 bg-amber-500/10 text-amber-300"
+                          }`}>
+                            {fetchJobs[post.id].status.toLowerCase()}
+                          </span>
+                        )}
+
+                        <Button onClick={() => onOpenPost(post)} variant="ghost">Status</Button>
+                        <a 
+                          className="inline-flex h-10 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-3 text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)] transition-all active:scale-95" 
+                          href={post.postUrl} 
+                          target="_blank" 
+                          rel="noreferrer"
+                        >
+                          <ExternalLink size={16} />
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,6 +4,9 @@ import { api } from "../services/api";
 import type { Account } from "../types";
 import { Button } from "./Button";
 import { EmptyState } from "./EmptyState";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Checkbox } from "./ui/checkbox";
 
 type Props = {
   title: string;
@@ -94,42 +97,41 @@ export function AccountManager({ title, kind }: Props) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 text-[var(--text-muted)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold">{title}</h1>
+        <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">{title}</h1>
         <Button onClick={() => void load()} variant="ghost">Refresh</Button>
       </div>
 
-      <form onSubmit={(event) => void submit(event)} className={`grid gap-3 rounded-md border border-line bg-white p-4 ${kind === "monitored" ? "md:grid-cols-[1fr_1fr_1fr_auto_auto]" : "md:grid-cols-[1fr_1fr_auto_auto]"}`}>
-        <input
-          className="h-10 rounded-md border border-line px-3 text-sm"
-          placeholder="username"
+      <form 
+        onSubmit={(event) => void submit(event)} 
+        className={`grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 shadow-xl backdrop-blur-xl ${
+          kind === "monitored" ? "md:grid-cols-[1fr_1fr_1fr_auto_auto]" : "md:grid-cols-[1fr_1fr_auto_auto]"
+        }`}
+      >
+        <Input
+          placeholder="Username"
           value={form.username}
           onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
           required
         />
-        <input
-          className="h-10 rounded-md border border-line px-3 text-sm"
-          placeholder="display name"
+        <Input
+          placeholder="Display Name"
           value={form.displayName}
           onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))}
         />
         {kind === "monitored" && (
-          <input
-            className="h-10 rounded-md border border-line px-3 text-sm"
+          <Input
             placeholder="Cabang PAC"
             value={form.cabangPac}
             onChange={(event) => setForm((current) => ({ ...current, cabangPac: event.target.value }))}
           />
         )}
-        <label className="flex h-10 items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={form.isActive}
-            onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))}
-          />
-          Active
-        </label>
+        <Checkbox
+          checked={form.isActive}
+          onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))}
+          label="Active"
+        />
         <div className="flex gap-2">
           <Button icon={editing ? <Save size={16} /> : <Plus size={16} />} type="submit">
             {editing ? "Save" : "Add"}
@@ -151,16 +153,15 @@ export function AccountManager({ title, kind }: Props) {
       </form>
 
       {kind === "monitored" && (
-        <form onSubmit={(event) => void submitBulkImport(event)} className="space-y-3 rounded-md border border-line bg-white p-4">
+        <form onSubmit={(event) => void submitBulkImport(event)} className="space-y-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 shadow-xl backdrop-blur-xl">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold">Bulk import akun wajib PAC</h2>
-              <p className="text-xs text-slate-500">Format per baris: username, display name, Cabang PAC</p>
+              <h2 className="text-sm font-semibold text-[var(--text)]">Bulk Import Akun Wajib PAC</h2>
+              <p className="text-xs text-[var(--text-subtle)]">Format per baris: username, display name, Cabang PAC</p>
             </div>
             <Button icon={<Upload size={16} />} type="submit" variant="ghost">Import</Button>
           </div>
-          <textarea
-            className="min-h-28 w-full resize-y rounded-md border border-line px-3 py-2 text-sm"
+          <Textarea
             placeholder={"pac_user_1, PAC 1, Cabang PAC A\npac_user_2, PAC 2, Cabang PAC A"}
             value={bulkText}
             onChange={(event) => setBulkText(event.target.value)}
@@ -168,44 +169,52 @@ export function AccountManager({ title, kind }: Props) {
         </form>
       )}
 
-      {error && <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>}
-      {loading ? <div className="text-sm text-slate-500">Loading...</div> : null}
-      {!loading && accounts.length === 0 ? <EmptyState message="No accounts yet." /> : null}
+      {error && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
+      {loading ? <div className="text-sm text-[var(--text-subtle)] animate-pulse">Loading accounts...</div> : null}
+      {!loading && accounts.length === 0 ? <EmptyState message="Belum ada target akun terdaftar." /> : null}
 
-      <div className="overflow-hidden rounded-md border border-line bg-white">
-        <table className="w-full min-w-[680px] text-left text-sm">
-          <thead className="bg-mist text-xs uppercase text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Username</th>
-              <th className="px-4 py-3">Display Name</th>
-              {kind === "monitored" && <th className="px-4 py-3">Cabang PAC</th>}
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {accounts.map((account) => (
-              <tr key={account.id} className="border-t border-line">
-                <td className="px-4 py-3 font-medium">@{account.username}</td>
-                <td className="px-4 py-3 text-slate-600">{account.displayName ?? "-"}</td>
-                {kind === "monitored" && <td className="px-4 py-3 text-slate-600">{account.cabangPac ?? "-"}</td>}
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold ${account.isActive ? "border-teal-200 bg-teal-50 text-teal-700" : "border-slate-200 bg-slate-50 text-slate-500"}`}>
-                    {account.isActive && <Check size={13} />}
-                    {account.isActive ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-end gap-2">
-                    <Button icon={<Pencil size={15} />} variant="ghost" onClick={() => edit(account)} type="button">Edit</Button>
-                    <Button icon={<Trash2 size={15} />} variant="danger" onClick={() => void remove(account.id)} type="button">Delete</Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {!loading && accounts.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--surface)]">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-sm">
+              <thead className="bg-[var(--surface-muted)] text-xs uppercase text-[var(--text-subtle)] border-b border-[var(--border-soft)]">
+                <tr>
+                  <th className="px-4 py-3.5">Username</th>
+                  <th className="px-4 py-3.5">Display Name</th>
+                  {kind === "monitored" && <th className="px-4 py-3.5">Cabang PAC</th>}
+                  <th className="px-4 py-3.5">Status</th>
+                  <th className="px-4 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-soft)]">
+                {accounts.map((account) => (
+                  <tr key={account.id} className="hover:bg-[var(--surface-hover)] transition-all">
+                    <td className="px-4 py-3 font-semibold text-[var(--text)]">@{account.username}</td>
+                    <td className="px-4 py-3 text-[var(--text-muted)]">{account.displayName ?? "-"}</td>
+                    {kind === "monitored" && <td className="px-4 py-3 text-[var(--text-muted)]">{account.cabangPac ?? "-"}</td>}
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                        account.isActive 
+                          ? "border-sky-500/20 bg-sky-500/10 text-sky-400" 
+                          : "border-slate-500/20 bg-slate-500/10 text-slate-400"
+                      }`}>
+                        {account.isActive && <Check size={13} />}
+                        {account.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end gap-2">
+                        <Button icon={<Pencil size={15} />} variant="ghost" onClick={() => edit(account)} type="button">Edit</Button>
+                        <Button icon={<Trash2 size={15} />} variant="danger" onClick={() => void remove(account.id)} type="button">Delete</Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

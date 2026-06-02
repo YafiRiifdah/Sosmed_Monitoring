@@ -2,36 +2,162 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  color: #17202a;
-  background: #f5f7fa;
+:root {
+  --polar-bg: #0b111e;
+  --polar-card: rgba(22, 30, 49, 0.45);
+  --polar-border: rgba(56, 189, 248, 0.08);
+  --polar-text: #f8fafc;
+  --polar-text-muted: #64748b;
+  --aurora-mint: #38bdf8;
+  --aurora-violet: #3b82f6;
+  --app-bg: #08111f;
+  --app-bg-soft: #0c1627;
+  --surface: rgba(16, 27, 46, 0.72);
+  --surface-strong: rgba(15, 25, 43, 0.96);
+  --surface-muted: rgba(148, 163, 184, 0.08);
+  --surface-hover: rgba(148, 163, 184, 0.13);
+  --field-bg: rgba(7, 13, 24, 0.7);
+  --border: rgba(148, 163, 184, 0.16);
+  --border-soft: rgba(148, 163, 184, 0.1);
+  --text: #f8fafc;
+  --text-muted: #cbd5e1;
+  --text-subtle: #94a3b8;
+  --placeholder: #64748b;
+  --accent: #38bdf8;
+  --accent-hover: #7dd3fc;
+  --accent-soft: rgba(56, 189, 248, 0.1);
+  --accent-ring: rgba(56, 189, 248, 0.38);
+  --accent-contrast: #0b111e;
+  --danger: #fb7185;
+  --danger-soft: rgba(244, 63, 94, 0.1);
 }
 
-button, input, select {
+:root[data-theme="light"],
+:root.light {
+  --polar-bg: #eef4fb;
+  --polar-card: rgba(255, 255, 255, 0.78);
+  --polar-border: rgba(14, 116, 144, 0.12);
+  --polar-text: #0f172a;
+  --polar-text-muted: #64748b;
+  --aurora-mint: #0891b2;
+  --aurora-violet: #2563eb;
+  --app-bg: #f4f7fb;
+  --app-bg-soft: #ffffff;
+  --surface: rgba(255, 255, 255, 0.9);
+  --surface-strong: rgba(255, 255, 255, 0.96);
+  --surface-muted: rgba(15, 23, 42, 0.035);
+  --surface-hover: rgba(14, 116, 144, 0.075);
+  --field-bg: rgba(255, 255, 255, 0.9);
+  --border: rgba(15, 23, 42, 0.13);
+  --border-soft: rgba(15, 23, 42, 0.08);
+  --text: #0f172a;
+  --text-muted: #334155;
+  --text-subtle: #64748b;
+  --placeholder: #94a3b8;
+  --accent: #0ea5e9;
+  --accent-hover: #0284c7;
+  --accent-soft: rgba(14, 165, 233, 0.1);
+  --accent-ring: rgba(14, 165, 233, 0.28);
+  --accent-contrast: #ffffff;
+  --danger: #e11d48;
+  --danger-soft: rgba(225, 29, 72, 0.08);
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background-color: var(--app-bg);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.011em;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+button, input, select, textarea {
   font: inherit;
 }
 
+/* Premium smooth text field focus transition (prevents glitches/shifts) */
+input, textarea {
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease !important;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-ring) !important;
+  background-color: var(--field-bg) !important;
+}
+
+:root[data-theme="light"] input:focus,
+:root[data-theme="light"] textarea:focus,
+:root.light input:focus,
+:root.light textarea:focus {
+  background-color: #ffffff !important;
+  border-color: var(--accent) !important;
+}
+
+.app-shell {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-bg-soft) 42%, transparent), transparent 24rem),
+    var(--app-bg);
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.38;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+
+/* Beautiful frosted polar steel glassmorphism */
+.bg-polar-glass {
+  background: var(--polar-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.border-polar-line {
+  border-color: var(--polar-border);
+}
+
+/* Premium custom status badges with polar glow */
 .status-complete {
-  @apply bg-teal-50 text-teal-700 border-teal-200;
+  background-color: rgba(56, 189, 248, 0.08);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.15);
 }
 
 .status-like_only {
-  @apply bg-blue-50 text-blue-700 border-blue-200;
+  background-color: rgba(45, 212, 191, 0.08);
+  color: #2dd4bf;
+  border-color: rgba(45, 212, 191, 0.15);
 }
 
 .status-comment_only {
-  @apply bg-amber-50 text-amber-700 border-amber-200;
+  background-color: rgba(99, 102, 241, 0.08);
+  color: #818cf8;
+  border-color: rgba(99, 102, 241, 0.15);
 }
 
 .status-like_unavailable {
-  @apply bg-slate-50 text-slate-700 border-slate-200;
+  background-color: rgba(148, 163, 184, 0.08);
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.15);
 }
 
 .status-missing {
-  @apply bg-rose-50 text-rose-700 border-rose-200;
+  background-color: rgba(244, 63, 94, 0.08);
+  color: #fb7185;
+  border-color: rgba(244, 63, 94, 0.15);
 }
 
+/* Shimmer animation on dark steel background */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -42,7 +168,39 @@ button, input, select {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #f8fafc 25%, #f1f5f9 50%, #f8fafc 75%);
+  background: linear-gradient(90deg, var(--surface-muted) 25%, var(--surface-hover) 50%, var(--surface-muted) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
+}
+
+/* Northern polar lights floating animation */
+@keyframes aurora-float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translateY(-25px) scale(1.08);
+    opacity: 0.18;
+  }
+}
+
+.animate-aurora-float {
+  animation: aurora-float 10s infinite ease-in-out;
+}
+
+/* Smooth customized polar scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--app-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-hover);
 }

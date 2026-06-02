@@ -1,3 +1,8 @@
 export function EmptyState({ message }: { message: string }) {
-  return <div className="rounded-md border border-dashed border-line bg-white p-6 text-center text-sm text-slate-500">{message}</div>;
+  return (
+    <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-muted)] p-8 text-center text-sm text-[var(--text-subtle)]">
+      {message}
+    </div>
+  );
 }
+

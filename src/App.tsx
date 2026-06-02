@@ -51,8 +51,8 @@ export function App() {
   // 1. Render sleek loading spinner during session restoration
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#090d16]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal-500 border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-[var(--app-bg)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
       </div>
     );
   }
