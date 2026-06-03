@@ -4,6 +4,7 @@ import { Button } from "../components/Button";
 import { CustomSelect } from "../components/ui/select";
 import { Input } from "../components/ui/input";
 import { Checkbox } from "../components/ui/checkbox";
+import { DatePickerField } from "../components/ui/date-picker";
 import { EmptyState } from "../components/EmptyState";
 import { useAsync } from "../hooks/useAsync";
 import { api } from "../services/api";
@@ -165,16 +166,8 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
           placeholder="All completion"
           className="w-full"
         />
-        <Input 
-          type="date" 
-          value={dateFrom} 
-          onChange={(event) => setDateFrom(event.target.value)} 
-        />
-        <Input 
-          type="date" 
-          value={dateTo} 
-          onChange={(event) => setDateTo(event.target.value)} 
-        />
+        <DatePickerField value={dateFrom} onChange={setDateFrom} placeholder="Tanggal mulai" />
+        <DatePickerField value={dateTo} onChange={setDateTo} placeholder="Tanggal akhir" />
         <Checkbox 
           checked={onlyTracked} 
           onChange={(event) => setOnlyTracked(event.target.checked)} 
@@ -182,9 +175,9 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
         />
       </div>
 
-      {formError && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{formError}</div>}
+      {formError && <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">{formError}</div>}
       {message && <div className="rounded-md border border-[var(--accent-ring)] bg-[var(--accent-soft)] p-3 text-sm text-[var(--accent)]">{message}</div>}
-      {error && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
+      {error && <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">{error}</div>}
       {loading ? <div className="text-sm text-[var(--text-subtle)] animate-pulse">Loading posts...</div> : null}
       {!loading && posts.length === 0 ? <EmptyState message="Belum ada postingan yang ditemukan." /> : null}
 
@@ -226,10 +219,10 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
                         {fetchJobs[post.id] && (
                           <span className={`inline-flex h-10 items-center rounded-md border px-3 text-xs font-semibold ${
                             fetchJobs[post.id].status === "COMPLETED"
-                              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                              ? "border-[color-mix(in_srgb,var(--success)_22%,transparent)] bg-[var(--success-soft)] text-[var(--success)]"
                               : fetchJobs[post.id].status === "FAILED"
-                                ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
-                                : "border-amber-500/20 bg-amber-500/10 text-amber-300"
+                                ? "border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] text-[var(--danger)]"
+                                : "border-[color-mix(in_srgb,var(--warning)_22%,transparent)] bg-[var(--warning-soft)] text-[var(--warning)]"
                           }`}>
                             {fetchJobs[post.id].status.toLowerCase()}
                           </span>

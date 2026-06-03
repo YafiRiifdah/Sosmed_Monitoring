@@ -22,7 +22,7 @@ export function PostDetailPage({ post, onBack }: { post: PostSummary; onBack: ()
         <Button onClick={() => void reload()} variant="ghost">Refresh</Button>
       </div>
 
-      {error && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
+      {error && <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">{error}</div>}
       {loading ? <div className="text-sm text-[var(--text-subtle)] animate-pulse">Loading post detail...</div> : null}
 
       {!loading && (
@@ -43,12 +43,12 @@ export function PostDetailPage({ post, onBack }: { post: PostSummary; onBack: ()
                   <tr key={row.id} className="hover:bg-[var(--surface-hover)] transition-all">
                     <td className="px-4 py-3 font-semibold text-[var(--text)]">@{row.username}</td>
                     <td className="px-4 py-3">
-                      {row.liked ? <Check className="text-emerald-400" size={18} /> : <X className="text-rose-400" size={18} />}
+                      {row.liked ? <Check className="text-[var(--success)]" size={18} /> : <X className="text-[var(--danger)]" size={18} />}
                     </td>
                     <td className="px-4 py-3">
-                      {row.commented ? <Check className="text-violet-400" size={18} /> : <X className="text-rose-400" size={18} />}
+                      {row.commented ? <Check className="text-[var(--accent)]" size={18} /> : <X className="text-[var(--danger)]" size={18} />}
                     </td>
-                    <td className="px-4 py-3 font-bold text-amber-400 font-mono">{row.score}</td>
+                    <td className="px-4 py-3 font-bold text-[var(--warning)] font-mono">{row.score}</td>
                     <td className="px-4 py-3"><StatusBadge status={row.status} /></td>
                   </tr>
                 ))}

@@ -40,7 +40,7 @@ export function OverviewPage() {
       label: "Target Accounts",
       value: data?.totalTargetAccounts ?? 0,
       icon: <Users size={18} />,
-      tone: "text-violet-400",
+      tone: "text-[var(--accent)]",
     },
     {
       label: "Posts",
@@ -52,25 +52,25 @@ export function OverviewPage() {
       label: "Monitored",
       value: data?.totalMonitoredAccounts ?? 0,
       icon: <Users size={18} />,
-      tone: "text-teal-400",
+      tone: "text-[var(--success)]",
     },
     {
       label: "Complete",
       value: data?.totalCompletedEngagement ?? 0,
       icon: <CheckCircle2 size={18} />,
-      tone: "text-emerald-400",
+      tone: "text-[var(--success)]",
     },
     {
       label: "Incomplete",
       value: data?.totalIncompleteEngagement ?? 0,
       icon: <RefreshCw size={18} />,
-      tone: "text-rose-400",
+      tone: "text-[var(--danger)]",
     },
     {
       label: "Completion",
       value: `${data?.completionPercentage ?? 0}%`,
       icon: <Percent size={18} />,
-      tone: "text-amber-400",
+      tone: "text-[var(--warning)]",
     },
   ];
 
@@ -156,7 +156,7 @@ export function OverviewPage() {
       </div>
 
       {error && (
-        <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">
+        <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">
           {error}
         </div>
       )}
@@ -235,7 +235,7 @@ export function OverviewPage() {
                   </p>
                 </div>
 
-                <Percent size={18} className="text-amber-400" />
+                <Percent size={18} className="text-[var(--warning)]" />
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
@@ -243,7 +243,7 @@ export function OverviewPage() {
                   <div className="text-xs text-[var(--text-subtle)]">
                     Completed
                   </div>
-                  <div className="mt-2 text-2xl font-bold text-emerald-400">
+                  <div className="mt-2 text-2xl font-bold text-[var(--success)]">
                     {data?.totalCompletedEngagement ?? 0}
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export function OverviewPage() {
                   <div className="text-xs text-[var(--text-subtle)]">
                     Incomplete
                   </div>
-                  <div className="mt-2 text-2xl font-bold text-rose-400">
+                  <div className="mt-2 text-2xl font-bold text-[var(--danger)]">
                     {data?.totalIncompleteEngagement ?? 0}
                   </div>
                 </div>
@@ -279,7 +279,7 @@ export function OverviewPage() {
                   </p>
                 </div>
 
-                <TrendingUp size={18} className="text-emerald-400" />
+                <TrendingUp size={18} className="text-[var(--success)]" />
               </div>
 
               <div className="flex h-32 items-end gap-2">
@@ -313,7 +313,7 @@ export function OverviewPage() {
                   </p>
                 </div>
 
-                <Clock size={18} className="text-violet-400" />
+                <Clock size={18} className="text-[var(--accent)]" />
               </div>
 
               <div className="space-y-3">
@@ -350,7 +350,7 @@ export function OverviewPage() {
                   </p>
                 </div>
 
-                <Trophy size={18} className="text-amber-400" />
+                <Trophy size={18} className="text-[var(--warning)]" />
               </div>
 
               <div className="space-y-3">
@@ -360,7 +360,7 @@ export function OverviewPage() {
                     className="flex items-center justify-between rounded-xl border border-[var(--border-soft)] bg-[var(--surface-muted)] p-3"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--surface)] text-sm font-bold text-amber-300">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--surface)] text-sm font-bold text-[var(--warning)]">
                         #{index + 1}
                       </div>
 

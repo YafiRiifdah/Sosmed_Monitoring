@@ -95,13 +95,13 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
       </div>
 
       {deleteError && (
-        <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">
+        <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">
           {deleteError}
         </div>
       )}
 
       {error && (
-        <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">
+        <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">
           {error}
         </div>
       )}
@@ -152,12 +152,12 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                       </td>
                       <td className="py-3.5 px-4">
                         {isSuper ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2.5 py-0.5 text-xs font-semibold text-violet-400 border border-violet-500/20">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--accent)] border border-[var(--accent-ring)]">
                             <Shield size={12} />
                             Super Admin
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-semibold text-slate-400 border border-slate-500/20">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-muted)] px-2.5 py-0.5 text-xs font-semibold text-[var(--text-muted)] border border-[var(--border-soft)]">
                             Admin
                           </span>
                         )}
@@ -175,7 +175,7 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                           type="button"
                           disabled={isSelf || isSuper}
                           onClick={() => void handleDeleteAdmin(u.id, u.username)}
-                          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border text-[var(--text-subtle)] hover:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/30 transition-all ${
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border text-[var(--text-subtle)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] hover:border-[color-mix(in_srgb,var(--danger)_30%,transparent)] transition-all ${
                             isSelf || isSuper ? "opacity-20 cursor-not-allowed border-transparent" : "border-[var(--border)] bg-[var(--surface-muted)] active:scale-95"
                           }`}
                           title={isSelf ? "Anda tidak dapat menghapus diri sendiri" : isSuper ? "Super Admin tidak dapat dihapus" : "Hapus Admin"}
@@ -209,12 +209,12 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
       >
         <form onSubmit={(e) => void handleCreateAdmin(e)} className="space-y-4">
           {formError && (
-            <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-xs text-rose-300">
+            <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-xs text-[var(--danger)]">
               {formError}
             </div>
           )}
           {formSuccess && (
-            <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center gap-1.5">
+            <div className="rounded-md border border-[color-mix(in_srgb,var(--success)_22%,transparent)] bg-[var(--success-soft)] p-3 text-xs text-[var(--success)] flex items-center gap-1.5">
               <CheckCircle2 size={14} className="shrink-0" />
               <span>{formSuccess}</span>
             </div>

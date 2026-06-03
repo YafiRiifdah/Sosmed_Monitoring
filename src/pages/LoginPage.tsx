@@ -92,7 +92,7 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="flex items-start gap-2.5 rounded-lg border border-rose-500/20 bg-rose-500/10 p-3.5 text-xs text-rose-300 overflow-hidden"
+                className="flex items-start gap-2.5 rounded-lg border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3.5 text-xs text-[var(--danger)] overflow-hidden"
               >
                 <ShieldAlert size={16} className="shrink-0 mt-0.5" />
                 <span>{error}</span>

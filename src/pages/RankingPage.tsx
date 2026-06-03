@@ -15,7 +15,7 @@ export function RankingPage() {
         <Button onClick={() => void reload()} variant="ghost">Refresh</Button>
       </div>
 
-      {error && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
+      {error && <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">{error}</div>}
       {loading ? <div className="text-sm text-[var(--text-subtle)] animate-pulse">Loading ranking...</div> : null}
       {!loading && (data ?? []).length === 0 ? <EmptyState message="Belum ada data ranking." /> : null}
 
@@ -43,10 +43,10 @@ export function RankingPage() {
                             size={16} 
                             className={
                               index === 0 
-                                ? "text-amber-400" 
+                                ? "text-[var(--warning)]" 
                                 : index === 1 
-                                ? "text-slate-300" 
-                                : "text-amber-600/80"
+                                ? "text-[var(--text-muted)]" 
+                                : "text-[var(--warning)] opacity-80"
                             } 
                           />
                         ) : (
@@ -57,7 +57,7 @@ export function RankingPage() {
                     <td className="px-4 py-3 font-semibold text-[var(--text)]">@{row.username}</td>
                     <td className="px-4 py-3 text-[var(--text-muted)]">{row.totalLikes}</td>
                     <td className="px-4 py-3 text-[var(--text-muted)]">{row.totalComments}</td>
-                    <td className="px-4 py-3 font-bold text-amber-400 font-mono">{row.totalScore}</td>
+                    <td className="px-4 py-3 font-bold text-[var(--warning)] font-mono">{row.totalScore}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         <div className="h-2.5 w-28 overflow-hidden rounded-full bg-[var(--surface-muted)] p-[1px] border border-[var(--border-soft)]">

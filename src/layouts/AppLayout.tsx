@@ -103,7 +103,7 @@ export function AppLayout({
         <div className="absolute bottom-0 left-0 right-0 border-t border-[var(--border-soft)] p-4">
           <button
             onClick={onLogout}
-            className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-muted)] transition-all hover:border-rose-500/30 hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus:outline-none"
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-muted)] transition-all hover:border-[color-mix(in_srgb,var(--danger)_30%,transparent)] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus:outline-none"
           >
             <LogOut size={14} />
             Keluar Sesi
@@ -143,7 +143,7 @@ export function AppLayout({
         </div>
 
         {/* Main Section */}
-        <main className="mx-auto max-w-7xl p-4 pb-24 sm:p-8 lg:p-10 lg:pb-10">{children}</main>
+        <main className="w-full p-4 pb-24 sm:p-8 lg:p-10 lg:pb-10">{children}</main>
       </div>
     </div>
   );

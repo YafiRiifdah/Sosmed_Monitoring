@@ -5,11 +5,11 @@ import { cn } from "../../lib/utils";
 export const badgeVariants = cva("inline-flex min-w-24 justify-center rounded-md border px-2 py-1 text-xs font-semibold backdrop-blur-md transition-colors", {
   variants: {
     tone: {
-      complete: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
-      likeOnly: "border-teal-500/25 bg-teal-500/10 text-teal-400",
-      commentOnly: "border-indigo-500/25 bg-indigo-500/10 text-indigo-400",
-      likeUnavailable: "border-slate-500/20 bg-slate-500/10 text-slate-400",
-      missing: "border-rose-500/25 bg-rose-500/10 text-rose-400"
+      complete: "border-[color-mix(in_srgb,var(--success)_25%,transparent)] bg-[var(--success-soft)] text-[var(--success)]",
+      likeOnly: "border-[var(--accent-ring)] bg-[var(--accent-soft)] text-[var(--accent)]",
+      commentOnly: "border-[color-mix(in_srgb,var(--info)_25%,transparent)] bg-[var(--info-soft)] text-[var(--info)]",
+      likeUnavailable: "border-[var(--border-soft)] bg-[var(--surface-muted)] text-[var(--text-muted)]",
+      missing: "border-[color-mix(in_srgb,var(--danger)_25%,transparent)] bg-[var(--danger-soft)] text-[var(--danger)]"
     }
   },
   defaultVariants: {

@@ -10,7 +10,7 @@ export const buttonVariants = cva(
       variant: {
         primary: "bg-[image:var(--primary-gradient)] text-[var(--accent-contrast)] font-bold hover:opacity-95",
         ghost: "border border-[var(--border-soft)] bg-[var(--surface-muted)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)] hover:border-[var(--border)]",
-        danger: "bg-[var(--danger-soft)] text-[var(--danger)] border border-rose-500/20 hover:bg-rose-500/20"
+        danger: "bg-[var(--danger-soft)] text-[var(--danger)] border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] hover:bg-[color-mix(in_srgb,var(--danger-soft)_70%,var(--surface-hover))]"
       }
     },
     defaultVariants: {
