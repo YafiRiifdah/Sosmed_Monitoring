@@ -8,7 +8,7 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] shadow-md shadow-sky-400/10 font-bold",
+        primary: "bg-[image:var(--primary-gradient)] text-[var(--accent-contrast)] font-bold hover:opacity-95",
         ghost: "border border-[var(--border-soft)] bg-[var(--surface-muted)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)] hover:border-[var(--border)]",
         danger: "bg-[var(--danger-soft)] text-[var(--danger)] border border-rose-500/20 hover:bg-rose-500/20"
       }

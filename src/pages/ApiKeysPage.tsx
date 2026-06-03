@@ -106,11 +106,11 @@ export function ApiKeysPage() {
             const isLow = usage.remaining > 0 && usage.remaining < 20;
 
             return (
-              <Card key={usage.key} className="relative overflow-hidden border-[var(--border-soft)] hover:border-sky-500/20 transition-all duration-300">
+              <Card key={usage.key} className="relative overflow-hidden border-[var(--border-soft)] hover:border-[var(--accent-ring)] transition-all duration-300">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-sky-400">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--accent)]">
                         <Key size={18} />
                       </div>
                       <div>
@@ -130,7 +130,7 @@ export function ApiKeysPage() {
                           Low Limit
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-400 border border-sky-500/20">
+                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
                           Active
                         </span>
                       )}
@@ -151,7 +151,7 @@ export function ApiKeysPage() {
                             ? "bg-rose-400" 
                             : isLow 
                             ? "bg-amber-400" 
-                            : "bg-sky-400"
+                            : "bg-[var(--accent)]"
                         }`}
                         style={{ width: `${pct}%` }}
                       />
@@ -222,14 +222,14 @@ export function ApiKeysPage() {
       {/* Multi-Account & Scale Roadmap Tutorial Card */}
       <div className="pt-4">
         <h2 className="text-lg font-semibold mb-4 text-[var(--text)] flex items-center gap-2 tracking-wide">
-          <Sparkles className="text-sky-400" size={19} />
+          <Sparkles className="text-amber-400" size={19} />
           Panduan Skalabilitas: Ternak Banyak Akun & Rotasi API
         </h2>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-sky-500/20 transition-all duration-300">
+          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-[var(--accent-ring)] transition-all duration-300">
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-sky-400">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--accent)]">
                 <Layers size={16} />
               </div>
               <div>
@@ -241,9 +241,9 @@ export function ApiKeysPage() {
             </div>
           </Card>
 
-          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-blue-500/20 transition-all duration-300">
+          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-violet-500/20 transition-all duration-300">
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-blue-400">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-violet-400">
                 <Server size={16} />
               </div>
               <div>
@@ -255,9 +255,9 @@ export function ApiKeysPage() {
             </div>
           </Card>
 
-          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-sky-500/20 transition-all duration-300">
+          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-emerald-500/20 transition-all duration-300">
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-sky-400">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-emerald-400">
                 <Shield size={16} />
               </div>
               <div>
@@ -287,7 +287,7 @@ export function ApiKeysPage() {
             </div>
           )}
           {formSuccess && (
-            <div className="rounded-md border border-sky-500/20 bg-sky-500/10 p-3 text-xs text-sky-300 flex items-center gap-1.5">
+            <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center gap-1.5">
               <Shield size={14} className="shrink-0" />
               <span>{formSuccess}</span>
             </div>

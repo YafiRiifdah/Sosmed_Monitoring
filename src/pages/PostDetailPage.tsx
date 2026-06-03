@@ -43,12 +43,12 @@ export function PostDetailPage({ post, onBack }: { post: PostSummary; onBack: ()
                   <tr key={row.id} className="hover:bg-[var(--surface-hover)] transition-all">
                     <td className="px-4 py-3 font-semibold text-[var(--text)]">@{row.username}</td>
                     <td className="px-4 py-3">
-                      {row.liked ? <Check className="text-sky-400" size={18} /> : <X className="text-rose-400" size={18} />}
+                      {row.liked ? <Check className="text-emerald-400" size={18} /> : <X className="text-rose-400" size={18} />}
                     </td>
                     <td className="px-4 py-3">
-                      {row.commented ? <Check className="text-sky-400" size={18} /> : <X className="text-rose-400" size={18} />}
+                      {row.commented ? <Check className="text-violet-400" size={18} /> : <X className="text-rose-400" size={18} />}
                     </td>
-                    <td className="px-4 py-3 font-bold text-sky-400 font-mono">{row.score}</td>
+                    <td className="px-4 py-3 font-bold text-amber-400 font-mono">{row.score}</td>
                     <td className="px-4 py-3"><StatusBadge status={row.status} /></td>
                   </tr>
                 ))}

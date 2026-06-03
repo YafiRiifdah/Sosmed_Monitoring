@@ -203,3 +203,66 @@ Untuk mendukung pemantauan berskala besar secara gratis selamanya dengan tingkat
     *   **Apify (Multi-Token Query)**:
         Backend melakukan query berkala (secara background loop) ke REST API resmi Apify untuk setiap token akun yang terdaftar, mengambil sisa saldo kredit gratis dari masing-masing akun, dan menggabungkannya sebagai total saldo gabungan (misal: `$11.20 / $15.00` dari 3 akun Apify aktif).
 *   **Keuntungan**: Admin memiliki transparansi penuh terhadap status kesehatan dan masa aktif kuota dari puluhan akun gratisan secara terpusat langsung dari layar lokal, mempermudah manajemen kapasitas tanpa pusing memantau konsol eksternal.
+
+### 4. Integrasi Auto-Alerts & Telegram/WhatsApp Bot (Automated Notification System)
+*   **Konsep**: Membangun sistem notifikasi otomatis di luar platform web (*out-of-app notification*) untuk mempercepat rantai komando, sehingga pengawasan berjalan dinamis tanpa mengharuskan admin atau anggota terus-menerus membuka layar dashboard.
+*   **Arsitektur & Alur Kerja**:
+    ```text
+    [Post Baru Terdeteksi] ──► [Kirim Broadcaster ke Grup Koordinasi]
+                                       │
+                         [Tunggu Selama Waktu Toleransi (e.g., 2 Jam)]
+                                       │
+                                       ▼
+                         [Scraper Melakukan Uji Partisipasi]
+                                       │
+                       ┌───────────────┴───────────────┐
+                       ▼                               ▼
+               [Anggota Sudah Like/Comment]    [Ada Anggota Belum Merespons]
+                       │                               │
+                       ▼                               ▼
+                 [Abaikan Data]                [Kirim Tag/Mention Peringatan]
+                                               "Halo @AnggotaX, Anda belum
+                                                merespons post terbaru!"
+    ```
+*   **Mekanisme Teknis**:
+    *   **Telegram Bot Integration**: Memanfaatkan Node.js SDK (`telegraf`) untuk membuat bot interaktif. Akun monitored akan mendaftarkan ID Telegram mereka ke sistem. Setiap kali scraping periodik selesai, worker mengidentifikasi data `MISSING` atau parsial, lalu mengirimkan pesan tag otomatis ke grup koordinasi.
+    *   **WhatsApp Notification API**: Layanan alternatif menggunakan *gateway* WhatsApp pihak ketiga untuk mengirimkan chat pengingat langsung (*direct message*) kepada nomor telepon anggota yang melanggar.
+    *   **Emergency Quota Warning**: Mengirimkan alert prioritas tinggi kepada admin jika gabungan sisa kredit dari *Key Pool* berstatus kritis (misal: di bawah 10% dari kuota bulanan) agar admin dapat segera melakukan rotasi/pendaftaran key baru sebelum database scraper macet.
+*   **Dampak / Benefit**: Mengurangi beban kerja admin pengawas hingga 95% dan mendongkrak tingkat partisipasi anggota hingga mendekati 100% dalam waktu singkat setelah postingan terbit.
+
+### 5. Generator Ekspor Laporan PDF & Excel (Instant Document Report Exporter)
+*   **Konsep**: Menyediakan fungsionalitas satu-klik untuk mengekspor seluruh status kepatuhan dari basis data ke dalam dokumen fisik yang terformat secara rapi dan profesional untuk diserahkan ke jajaran pimpinan organisasi.
+*   **Detail Format Dokumen**:
+    *   **Laporan PDF Formal**: Menghasilkan berkas PDF siap cetak dengan tata letak kelas dunia:
+        *   Kop Surat resmi organisasi dan tanda tangan digital.
+        *   Ringkasan Statistik Utama (Persentase Kepatuhan Total, Rata-rata Keterlambatan Respons, Jumlah Akun Aktif).
+        *   Grafik Diagram Lingkaran (*Pie Chart*) status kepatuhan anggota.
+        *   Tabel Leaderboard 10 Besar Anggota Terbaik dan 5 Anggota dengan Kepatuhan Terendah untuk evaluasi pembinaan.
+    *   **Lembar Kerja Excel (XLSX)**: Mengunduh dataset tabular yang berisi seluruh riwayat scraping detail:
+        *   Kolom: ID Post, Username Target, Username Anggota, Waktu Post, Waktu Like, Waktu Comment, Status Akhir, dan Skor Perolehan.
+        *   Mempermudah admin untuk melakukan filter, pivot table, atau analisis lanjutan menggunakan Microsoft Excel / Google Sheets.
+*   **Mekanisme Teknis**:
+    *   Di backend, kita akan mengimplementasikan `pdfkit` atau engine headless browser (`puppeteer`) untuk merender template HTML interaktif secara dinamis ke bentuk PDF di sisi server.
+    *   Menggunakan pustaka `exceljs` untuk menyusun struktur baris, pewarnaan kolom status secara dinamis, dan rumus kalkulasi otomatis di berkas Excel sebelum dikirim ke klien.
+
+### 6. Grafik Analitik Kepatuhan Tingkat Lanjut (PAC Compliance & Trend Dashboard)
+*   **Konsep**: Memperkaya Halaman Overview Dashboard dengan visualisasi data statistik yang komprehensif, memetakan performa kepatuhan tidak hanya per individu melainkan juga per klaster wilayah/kelompok kepengurusan (Cabang PAC).
+*   **Rencana Komponen Grafik**:
+    *   **PAC Leaderboard Bar Chart**: Grafik batang vertikal yang membandingkan persentase kepatuhan rata-rata antar Cabang PAC (contoh: *PAC Cabang A: 99%*, *PAC Cabang B: 95%*, *PAC Cabang C: 70%*). Grafik ini mempermudah identifikasi wilayah mana saja yang kinerjanya tertinggal.
+    *   **Tren Partisipasi Bulanan (Line Chart)**: Grafik garis dinamis yang memetakan aktivitas harian selama 30 hari terakhir. Ini sangat berguna untuk mendeteksi tren penurunan kepatuhan pada hari-hari libur atau masa-masa tertentu.
+    *   **Engagement Weight Comparison Chart**: Menampilkan rasio perbandingan antara jumlah *Like* (bobot rendah) dan *Comment* (bobot tinggi) yang diselesaikan oleh anggota.
+*   **Mekanisme Teknis**:
+    *   Menggunakan pustaka `@radix-ui` yang dipadukan dengan **`recharts`** di sisi React frontend. Recharts mendukung visualisasi SVG responsif dengan transisi animasi CSS yang mulus serta tooltip hover bergaya modern (glassmorphic dark/light).
+
+### 7. Gamifikasi Kepatuhan Anggota (Badges & Achievement System)
+*   **Konsep**: Mengubah kewajiban pelaporan media sosial yang terkesan monoton menjadi tantangan yang interaktif dan kompetitif menggunakan elemen gamifikasi (*gamification*) untuk merangsang keaktifan anggota secara psikologis.
+*   **Sistem Penghargaan & Lencana**:
+    *   🏆 **Lencana "Perfect Week"**: Diberikan kepada anggota yang memiliki tingkat kepatuhan 100% (selalu melakukan *like* dan *comment*) pada seluruh postingan target selama 7 hari berturut-turut.
+    *   ⚡ **Lencana "Flash Responder"**: Diberikan jika anggota secara konsisten memberikan interaksi dalam waktu kurang dari 15 menit setelah target mempublikasikan postingan baru.
+    *   🛡️ **Lencana "Loyal Guard"**: Diberikan kepada anggota dengan masa bakti monitoring aktif terlama tanpa ada riwayat status `MISSING`.
+*   **Mekanisme Teknis**:
+    *   **Database (Prisma Schema)**: Menambahkan tabel `Badge` (id, name, icon, description) dan tabel relasi `UserBadge` (userId, badgeId, earnedAt) dengan relasi Many-to-Many ke tabel monitored accounts.
+    *   **Scoring Logic**: Di dalam `scoringService`, backend mendeteksi selisih waktu antara `postedAt` dan `updatedAt` (waktu like/comment). Jika memenuhi syarat, sistem secara otomatis memberikan lencana dan memicu notifikasi pop-up khusus di browser anggota.
+    *   **Visualisasi Profil**: Halaman profil monitored account akan memiliki galeri khusus yang menampilkan lencana yang berhasil mereka raih dengan pendaran neon biru-es/ungu yang bersinar.
+
+

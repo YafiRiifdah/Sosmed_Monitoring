@@ -114,7 +114,7 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
       </div>
 
       {/* Add Tracked Post Form */}
-      <form onSubmit={(event) => void submitTrackPost(event)} className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 shadow-xl backdrop-blur-xl md:grid-cols-[260px_1fr_auto]">
+      <form onSubmit={(event) => void submitTrackPost(event)} className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 backdrop-blur-xl md:grid-cols-[260px_1fr_auto]">
         <CustomSelect
           value={targetAccountId}
           onChange={setTargetAccountId}
@@ -142,7 +142,7 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
       </div>
 
       {/* Filter Options */}
-      <div className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 shadow-xl backdrop-blur-xl md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+      <div className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 backdrop-blur-xl md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
         <CustomSelect
           value={targetFilter}
           onChange={setTargetFilter}
@@ -183,7 +183,7 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
       </div>
 
       {formError && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{formError}</div>}
-      {message && <div className="rounded-md border border-sky-500/20 bg-sky-500/10 p-3 text-sm text-sky-300">{message}</div>}
+      {message && <div className="rounded-md border border-[var(--accent-ring)] bg-[var(--accent-soft)] p-3 text-sm text-[var(--accent)]">{message}</div>}
       {error && <div className="rounded-md border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
       {loading ? <div className="text-sm text-[var(--text-subtle)] animate-pulse">Loading posts...</div> : null}
       {!loading && posts.length === 0 ? <EmptyState message="Belum ada postingan yang ditemukan." /> : null}
@@ -216,7 +216,7 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
                         <div className="h-2.5 w-28 overflow-hidden rounded-full bg-[var(--surface-muted)] p-[1px] border border-[var(--border-soft)]">
                           <div className="h-full bg-[var(--accent)] rounded-full" style={{ width: `${post.engagementPercentage}%` }} />
                         </div>
-                        <span className="font-semibold text-sky-400 font-mono">{post.engagementPercentage}%</span>
+                        <span className="font-semibold text-[var(--accent)] font-mono">{post.engagementPercentage}%</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -226,7 +226,7 @@ export function PostsPage({ onOpenPost }: { onOpenPost: (post: PostSummary) => v
                         {fetchJobs[post.id] && (
                           <span className={`inline-flex h-10 items-center rounded-md border px-3 text-xs font-semibold ${
                             fetchJobs[post.id].status === "COMPLETED"
-                              ? "border-sky-500/20 bg-sky-500/10 text-sky-400"
+                              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
                               : fetchJobs[post.id].status === "FAILED"
                                 ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
                                 : "border-amber-500/20 bg-amber-500/10 text-amber-300"

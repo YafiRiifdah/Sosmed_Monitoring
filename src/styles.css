@@ -3,50 +3,64 @@
 @tailwind utilities;
 
 :root {
-  --polar-bg: #0b111e;
-  --polar-card: rgba(22, 30, 49, 0.45);
-  --polar-border: rgba(56, 189, 248, 0.08);
+  --polar-bg: #070d17;
+  --polar-card: rgba(16, 24, 38, 0.72);
+  --polar-border: rgba(1, 99, 255, 0.16);
   --polar-text: #f8fafc;
-  --polar-text-muted: #64748b;
-  --aurora-mint: #38bdf8;
-  --aurora-violet: #3b82f6;
-  --app-bg: #08111f;
-  --app-bg-soft: #0c1627;
-  --surface: rgba(16, 27, 46, 0.72);
-  --surface-strong: rgba(15, 25, 43, 0.96);
-  --surface-muted: rgba(148, 163, 184, 0.08);
-  --surface-hover: rgba(148, 163, 184, 0.13);
-  --field-bg: rgba(7, 13, 24, 0.7);
-  --border: rgba(148, 163, 184, 0.16);
-  --border-soft: rgba(148, 163, 184, 0.1);
+  --polar-text-muted: #8b95a7;
+  --aurora-mint: #34d399;
+  --aurora-violet: #0163ff;
+  --app-bg: #070c15;
+  --app-bg-soft: #0d1524;
+  --topbar: rgba(7, 12, 21, 0.92);
+  --sidebar: rgba(10, 17, 29, 0.86);
+  --surface: rgba(16, 25, 39, 0.76);
+  --surface-strong: rgba(14, 22, 34, 0.96);
+  --surface-muted: rgba(148, 163, 184, 0.075);
+  --surface-hover: rgba(1, 99, 255, 0.13);
+  --field-bg: rgba(9, 14, 23, 0.84);
+  --border: rgba(148, 163, 184, 0.18);
+  --border-soft: rgba(148, 163, 184, 0.11);
   --text: #f8fafc;
   --text-muted: #cbd5e1;
   --text-subtle: #94a3b8;
   --placeholder: #64748b;
-  --accent: #38bdf8;
-  --accent-hover: #7dd3fc;
-  --accent-soft: rgba(56, 189, 248, 0.1);
-  --accent-ring: rgba(56, 189, 248, 0.38);
-  --accent-contrast: #0b111e;
+  --accent: #0163ff;
+  --accent-hover: #1f75ff;
+  --accent-soft: rgba(1, 99, 255, 0.16);
+  --accent-ring: rgba(1, 99, 255, 0.34);
+  --accent-contrast: #ffffff;
+  --accent-secondary: #2563eb;
+  --accent-secondary-soft: rgba(37, 99, 235, 0.14);
+  --warning: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --success: #22c55e;
+  --success-soft: rgba(34, 197, 94, 0.12);
+  --info: #38bdf8;
+  --info-soft: rgba(56, 189, 248, 0.11);
   --danger: #fb7185;
   --danger-soft: rgba(244, 63, 94, 0.1);
+  --card-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --primary-gradient: linear-gradient(135deg, #0163ff 0%, #2f80ff 100%);
 }
 
 :root[data-theme="light"],
 :root.light {
-  --polar-bg: #eef4fb;
-  --polar-card: rgba(255, 255, 255, 0.78);
-  --polar-border: rgba(14, 116, 144, 0.12);
+  --polar-bg: #f8f9fd;
+  --polar-card: rgba(255, 255, 255, 0.86);
+  --polar-border: rgba(15, 118, 110, 0.13);
   --polar-text: #0f172a;
   --polar-text-muted: #64748b;
-  --aurora-mint: #0891b2;
-  --aurora-violet: #2563eb;
-  --app-bg: #f4f7fb;
+  --aurora-mint: #10b981;
+  --aurora-violet: #0163ff;
+  --app-bg: #f7f8fc;
   --app-bg-soft: #ffffff;
-  --surface: rgba(255, 255, 255, 0.9);
-  --surface-strong: rgba(255, 255, 255, 0.96);
-  --surface-muted: rgba(15, 23, 42, 0.035);
-  --surface-hover: rgba(14, 116, 144, 0.075);
+  --topbar: rgba(255, 255, 255, 0.94);
+  --sidebar: rgba(255, 255, 255, 0.82);
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-strong: rgba(255, 255, 255, 0.98);
+  --surface-muted: rgba(15, 23, 42, 0.04);
+  --surface-hover: rgba(37, 99, 235, 0.075);
   --field-bg: rgba(255, 255, 255, 0.9);
   --border: rgba(15, 23, 42, 0.13);
   --border-soft: rgba(15, 23, 42, 0.08);
@@ -54,13 +68,23 @@
   --text-muted: #334155;
   --text-subtle: #64748b;
   --placeholder: #94a3b8;
-  --accent: #0ea5e9;
-  --accent-hover: #0284c7;
-  --accent-soft: rgba(14, 165, 233, 0.1);
-  --accent-ring: rgba(14, 165, 233, 0.28);
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.1);
+  --accent-ring: rgba(37, 99, 235, 0.26);
   --accent-contrast: #ffffff;
+  --accent-secondary: #0163ff;
+  --accent-secondary-soft: rgba(1, 99, 255, 0.1);
+  --warning: #d97706;
+  --warning-soft: rgba(217, 119, 6, 0.1);
+  --success: #16a34a;
+  --success-soft: rgba(22, 163, 74, 0.1);
+  --info: #0284c7;
+  --info-soft: rgba(2, 132, 199, 0.1);
   --danger: #e11d48;
   --danger-soft: rgba(225, 29, 72, 0.08);
+  --card-shadow: 0 18px 52px rgba(15, 23, 42, 0.06);
+  --primary-gradient: linear-gradient(135deg, #0163ff 0%, #2f80ff 100%);
 }
 
 body {
@@ -97,7 +121,8 @@ input:focus, textarea:focus {
 
 .app-shell {
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--app-bg-soft) 42%, transparent), transparent 24rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--app-bg-soft) 42%, transparent), transparent 28rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 54%, transparent), transparent 34rem),
     var(--app-bg);
 }
 
@@ -128,21 +153,21 @@ input:focus, textarea:focus {
 
 /* Premium custom status badges with polar glow */
 .status-complete {
-  background-color: rgba(56, 189, 248, 0.08);
-  color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.15);
+  background-color: var(--success-soft);
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 22%, transparent);
 }
 
 .status-like_only {
-  background-color: rgba(45, 212, 191, 0.08);
-  color: #2dd4bf;
-  border-color: rgba(45, 212, 191, 0.15);
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .status-comment_only {
-  background-color: rgba(99, 102, 241, 0.08);
-  color: #818cf8;
-  border-color: rgba(99, 102, 241, 0.15);
+  background-color: var(--accent-secondary-soft);
+  color: var(--accent-secondary);
+  border-color: color-mix(in srgb, var(--accent-secondary) 22%, transparent);
 }
 
 .status-like_unavailable {
@@ -152,9 +177,9 @@ input:focus, textarea:focus {
 }
 
 .status-missing {
-  background-color: rgba(244, 63, 94, 0.08);
-  color: #fb7185;
-  border-color: rgba(244, 63, 94, 0.15);
+  background-color: var(--danger-soft);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 22%, transparent);
 }
 
 /* Shimmer animation on dark steel background */

@@ -57,13 +57,13 @@ export function RankingPage() {
                     <td className="px-4 py-3 font-semibold text-[var(--text)]">@{row.username}</td>
                     <td className="px-4 py-3 text-[var(--text-muted)]">{row.totalLikes}</td>
                     <td className="px-4 py-3 text-[var(--text-muted)]">{row.totalComments}</td>
-                    <td className="px-4 py-3 font-bold text-sky-400 font-mono">{row.totalScore}</td>
+                    <td className="px-4 py-3 font-bold text-amber-400 font-mono">{row.totalScore}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         <div className="h-2.5 w-28 overflow-hidden rounded-full bg-[var(--surface-muted)] p-[1px] border border-[var(--border-soft)]">
                           <div className="h-full bg-[var(--accent)] rounded-full" style={{ width: `${row.completionPercentage}%` }} />
                         </div>
-                        <span className="font-semibold text-sky-400 font-mono">{row.completionPercentage}%</span>
+                        <span className="font-semibold text-[var(--accent)] font-mono">{row.completionPercentage}%</span>
                       </div>
                     </td>
                   </tr>

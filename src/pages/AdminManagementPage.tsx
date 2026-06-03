@@ -110,7 +110,7 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
       <Card className="p-0 overflow-hidden border border-[var(--border-soft)] bg-[var(--surface)]">
         <div className="p-4 border-b border-[var(--border-soft)] flex items-center justify-between bg-[var(--surface-muted)]">
           <span className="font-bold text-[var(--text-muted)] text-sm">Daftar Admin Aktif</span>
-          <span className="text-xs font-semibold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
+          <span className="text-xs font-semibold text-[var(--accent)] bg-[var(--accent-soft)] px-2 py-0.5 rounded-full border border-[var(--accent-ring)]">
             {users?.length ?? 0} Pengguna
           </span>
         </div>
@@ -143,7 +143,7 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                         <div className="font-bold text-[var(--text)] flex items-center gap-1.5">
                           @{u.username}
                           {isSelf && (
-                            <span className="text-[10px] bg-sky-500/10 text-sky-400 px-1.5 py-0.2 rounded font-semibold border border-sky-500/20">
+                            <span className="text-[10px] bg-[var(--accent-soft)] text-[var(--accent)] px-1.5 py-0.2 rounded font-semibold border border-[var(--accent-ring)]">
                               Anda
                             </span>
                           )}
@@ -152,7 +152,7 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                       </td>
                       <td className="py-3.5 px-4">
                         {isSuper ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-500/20">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2.5 py-0.5 text-xs font-semibold text-violet-400 border border-violet-500/20">
                             <Shield size={12} />
                             Super Admin
                           </span>
@@ -214,7 +214,7 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
             </div>
           )}
           {formSuccess && (
-            <div className="rounded-md border border-sky-500/20 bg-sky-500/10 p-3 text-xs text-sky-300 flex items-center gap-1.5">
+            <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center gap-1.5">
               <CheckCircle2 size={14} className="shrink-0" />
               <span>{formSuccess}</span>
             </div>

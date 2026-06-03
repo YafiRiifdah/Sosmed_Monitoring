@@ -105,7 +105,7 @@ export function AccountManager({ title, kind }: Props) {
 
       <form 
         onSubmit={(event) => void submit(event)} 
-        className={`grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 shadow-xl backdrop-blur-xl ${
+        className={`grid gap-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 backdrop-blur-xl ${
           kind === "monitored" ? "md:grid-cols-[1fr_1fr_1fr_auto_auto]" : "md:grid-cols-[1fr_1fr_auto_auto]"
         }`}
       >
@@ -153,7 +153,7 @@ export function AccountManager({ title, kind }: Props) {
       </form>
 
       {kind === "monitored" && (
-        <form onSubmit={(event) => void submitBulkImport(event)} className="space-y-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 shadow-xl backdrop-blur-xl">
+        <form onSubmit={(event) => void submitBulkImport(event)} className="space-y-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-5 backdrop-blur-xl">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-[var(--text)]">Bulk Import Akun Wajib PAC</h2>
@@ -195,7 +195,7 @@ export function AccountManager({ title, kind }: Props) {
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
                         account.isActive 
-                          ? "border-sky-500/20 bg-sky-500/10 text-sky-400" 
+                          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400" 
                           : "border-slate-500/20 bg-slate-500/10 text-slate-400"
                       }`}>
                         {account.isActive && <Check size={13} />}

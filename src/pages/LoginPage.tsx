@@ -34,10 +34,10 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
         <ThemeToggle compact />
       </div>
 
-      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] shadow-2xl backdrop-blur-xl lg:grid-cols-[1fr_420px]">
+      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] backdrop-blur-xl lg:grid-cols-[1fr_420px]">
         <section className="hidden min-h-[560px] border-r border-[var(--border-soft)] bg-[var(--surface-muted)] p-8 lg:flex lg:flex-col lg:justify-between">
           <div>
-            <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm shadow-sky-400/10">
+            <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)]">
               <BarChart3 size={24} />
             </div>
             <h1 className="max-w-md text-4xl font-semibold leading-tight tracking-tight text-[var(--text)]">
@@ -71,7 +71,7 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
         >
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 10 }}
-            className="mx-auto mb-3 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl bg-[var(--accent)] shadow-[0_0_20px_rgba(56,189,248,0.15)] lg:mx-0"
+            className="mx-auto mb-3 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl bg-[var(--accent)] lg:mx-0"
           >
             <Key className="text-[var(--accent-contrast)] font-bold" size={24} />
           </motion.div>
@@ -84,7 +84,7 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 22, delay: 0.1 }}
-          className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-strong)] p-5 shadow-xl backdrop-blur-xl sm:p-6"
+          className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-strong)] p-5 backdrop-blur-xl sm:p-6"
         >
           <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
             
@@ -145,7 +145,7 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (user: UserType)
               whileHover={loading ? undefined : { scale: 1.01 }}
               whileTap={loading ? undefined : { scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              className="group relative flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] py-3 text-sm font-bold text-[var(--accent-contrast)] shadow-md shadow-sky-400/5 transition-all hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:pointer-events-none"
+              className="group relative flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] py-3 text-sm font-bold text-[var(--accent-contrast)] transition-all hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:pointer-events-none"
             >
               {loading ? (
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--accent-contrast)] border-t-transparent" />
