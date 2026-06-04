@@ -163,7 +163,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   mask-image: linear-gradient(to bottom, black, transparent 72%);
 }
 
-
 /* Beautiful frosted polar steel glassmorphism */
 .bg-polar-glass {
   background: var(--polar-card);

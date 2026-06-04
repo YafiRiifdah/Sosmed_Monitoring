@@ -7,16 +7,70 @@ import { api } from "../services/api";
 
 export function RankingPage() {
   const { data, loading, error, reload } = useAsync(useCallback(() => api.ranking(), []));
+  const rankingTableSkeleton = (
+    <div className="overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--surface)]">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[720px] text-left text-sm">
+          <thead className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] text-xs uppercase text-[var(--text-subtle)]">
+            <tr>
+              <th className="px-4 py-3.5">Rank</th>
+              <th className="px-4 py-3.5">Username</th>
+              <th className="px-4 py-3.5">Likes</th>
+              <th className="px-4 py-3.5">Comments</th>
+              <th className="px-4 py-3.5">Score</th>
+              <th className="px-4 py-3.5">Completion</th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-[var(--border-soft)]">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <tr key={index}>
+                <td className="px-4 py-3">
+                  <div className="animate-shimmer h-8 w-8 rounded-lg bg-[var(--surface-muted)]" />
+                </td>
+                <td className="px-4 py-3">
+                  <div className="animate-shimmer h-4 w-32 rounded bg-[var(--surface-muted)]" />
+                </td>
+                <td className="px-4 py-3">
+                  <div className="animate-shimmer h-4 w-12 rounded bg-[var(--surface-muted)]" />
+                </td>
+                <td className="px-4 py-3">
+                  <div className="animate-shimmer h-4 w-12 rounded bg-[var(--surface-muted)]" />
+                </td>
+                <td className="px-4 py-3">
+                  <div className="animate-shimmer h-4 w-14 rounded bg-[var(--surface-muted)]" />
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="animate-shimmer h-2.5 w-28 rounded-full bg-[var(--surface-muted)]" />
+                    <div className="animate-shimmer h-4 w-10 rounded bg-[var(--surface-muted)]" />
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-5 text-[var(--text-muted)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">Ranking</h1>
-        <Button onClick={() => void reload()} variant="ghost">Refresh</Button>
+        {loading ? (
+          <div className="animate-shimmer h-8 w-32 rounded bg-[var(--surface-muted)]" />
+        ) : (
+          <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">Ranking</h1>
+        )}
+        {loading ? (
+          <div className="animate-shimmer h-10 w-24 rounded-md bg-[var(--surface-muted)]" />
+        ) : (
+          <Button onClick={() => void reload()} variant="ghost">Refresh</Button>
+        )}
       </div>
 
       {error && <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">{error}</div>}
-      {loading ? <div className="text-sm text-[var(--text-subtle)] animate-pulse">Loading ranking...</div> : null}
+      {loading ? rankingTableSkeleton : null}
       {!loading && (data ?? []).length === 0 ? <EmptyState message="Belum ada data ranking." /> : null}
 
       {!loading && (data ?? []).length > 0 && (

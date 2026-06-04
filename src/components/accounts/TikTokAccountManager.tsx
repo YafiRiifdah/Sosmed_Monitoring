@@ -1,0 +1,40 @@
+import { Music2 } from "lucide-react";
+import { Card } from "../Card";
+import { EmptyState } from "../EmptyState";
+
+type AccountKind = "target" | "monitored";
+
+export function TikTokAccountManager({ kind }: { kind: AccountKind }) {
+  const accountLabel = kind === "target" ? "akun target" : "akun wajib PAC";
+  const title = kind === "target" ? "TikTok Target Accounts" : "TikTok Monitored Accounts";
+
+  return (
+    <div className="space-y-6 text-[var(--text-muted)]">
+      <section className="rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(135deg,var(--surface),var(--surface-muted))] p-5 shadow-sm backdrop-blur-xl">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--text-subtle)]">
+              Account Management
+            </p>
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
+              {title}
+            </h1>
+            <p className="mt-1 text-sm text-[var(--text-subtle)]">
+              Halaman {accountLabel} TikTok sudah disiapkan tanpa koneksi backend.
+            </p>
+          </div>
+
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] text-[var(--info)]">
+            <Music2 size={22} />
+          </div>
+        </div>
+      </section>
+
+      <Card className="border-dashed border-[var(--border)] bg-[var(--surface-muted)] py-12">
+        <EmptyState
+          message={`Data ${accountLabel} TikTok belum tersedia karena endpoint backend/API belum dibuat.`}
+        />
+      </Card>
+    </div>
+  );
+}

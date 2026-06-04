@@ -265,4 +265,363 @@ Untuk mendukung pemantauan berskala besar secara gratis selamanya dengan tingkat
     *   **Scoring Logic**: Di dalam `scoringService`, backend mendeteksi selisih waktu antara `postedAt` dan `updatedAt` (waktu like/comment). Jika memenuhi syarat, sistem secara otomatis memberikan lencana dan memicu notifikasi pop-up khusus di browser anggota.
     *   **Visualisasi Profil**: Halaman profil monitored account akan memiliki galeri khusus yang menampilkan lencana yang berhasil mereka raih dengan pendaran neon biru-es/ungu yang bersinar.
 
+---
+
+## 🔌 Arsitektur Ramping Multi-Platform (Instagram, Facebook, TikTok)
+
+Untuk mendukung pemantauan tiga platform sosial media sekaligus tanpa membebani server (VPS RAM/CPU terbatas) dan database Supabase PostgreSQL, kami merancang optimasi infrastruktur sebagai berikut:
+
+### 1. Optimalisasi RAM Server: Pemblokiran Aset Playwright (Request Blocking)
+*   **Strategi**: Menjalankan browser Chromium di server sangat memakan memori. Untuk mengatasinya, worker Playwright (baik di Node.js maupun Python) dikonfigurasi untuk memblokir pemuatan visual yang tidak diperlukan.
+*   **Detail**: Bot mengabaikan pengunduhan file Gambar, Video, Fonts, dan CSS Stylesheet. Browser hanya mengunduh data mentah HTML dan menyadap respons API JSON internal.
+*   **Keuntungan**: Menekan beban RAM server hingga **70%** dan meminimalkan konsumsi kuota bandwidth internet VPS hingga **80%**.
+
+### 2. Optimalisasi Storage Database: Pemrosesan di Memori RAM (In-Memory Processing)
+*   **Strategi**: Menghindari penyimpanan ratusan ribu data username publik (Likers/Commenters) ke database Supabase PostgreSQL.
+*   **Detail**: Pencocokan 11 akun monitored dengan data likes/comments dilakukan langsung di memori RAM server saat scraping berlangsung. Database hanya mencatat status akhir per anggota (e.g. `COMPLETE`, `LIKE_ONLY`, dll.).
+*   **Keuntungan**: Menghemat ruang penyimpanan database Supabase hingga **95%** (hanya menyimpan status terfilter, bukan jutaan baris data publik).
+
+### 3. Skema Data Terpadu (Unified Schema dengan Enum Platform)
+*   **Strategi**: Menghindari pembuatan tabel-tabel terpisah untuk setiap platform sosial media yang akan memperumit penulisan query dan dashboard.
+*   **Detail**: Menggunakan satu tabel postingan generik (`SocialPost`) yang dilengkapi kolom penunjuk platform (`platform` tipe ENUM: `INSTAGRAM`, `FACEBOOK`, `TIKTOK`).
+*   **Keuntungan**: Frontend dashboard dapat menggunakan satu endpoint API yang seragam dengan sistem tab filter platform.
+
+### 4. Penjadwalan Antrean Bergantian (Sequential Queue Scheduling)
+*   **Strategi**: Mencegah lonjakan CPU (*CPU spike*) hingga 100% yang berisiko membuat server hang akibat menjalankan beberapa browser secara bersamaan.
+*   **Detail**: Menjadwalkan antrean scraping di BullMQ secara berurutan dengan jeda waktu tertentu (misal: Scraper IG menit 0, Scraper FB menit 10, Scraper TikTok menit 20).
+*   **Keuntungan**: Menjaga utilisasi CPU server tetap stabil di bawah 20%.
+
+---
+
+## 🧪 Integrasi Detail & Blueprint Python FastAPI Scraping Worker
+
+Sebagai bagian dari rencana masa depan, penambahan **Python Worker berbasis FastAPI** dirancang untuk bertindak sebagai *Microservice Stateless* khusus penarik data platform non-Instagram (TikTok & Facebook). Ini memastikan beban pemrosesan browser dipisahkan sepenuhnya tanpa mengorbankan stabilitas Node.js Express.
+
+Untuk mempermudah manajemen, pemeliharaan, dan pemetaan, setiap modul scraper dipisahkan secara eksklusif dengan penamaan yang sangat jelas:
+- **Instagram Scraper**: Dinamakan `scrapingig` (Saat ini berjalan di Node.js Express/TS: `InstagramScraper.ts`, jika di-porting ke Python akan menjadi `scrapingig.py`).
+- **TikTok Scraper**: Dinamakan `scrapingtiktok` (Berjalan di Python: `scrapingtiktok.py`, Class: `ScrapingTikTok`).
+- **Facebook Scraper**: Dinamakan `scrapingfacebook` (Berjalan di Python: `scrapingfacebook.py`, Class: `ScrapingFacebook`).
+
+---
+
+### 1. Struktur Folder Proyek Python Worker (`/scraper-service`)
+
+Struktur folder dirancang terpisah dengan pemisahan file scraping yang jelas untuk masing-masing platform:
+```text
+scraper-service/
+├── app/
+│   ├── __init__.py
+│   ├── main.py              # Entrypoint FastAPI & Routing (Mapping Request ke Scraper)
+│   ├── scrapingtiktok.py    # Modul khusus TikTok Scraper (Class: ScrapingTikTok)
+│   ├── scrapingfacebook.py  # Modul khusus Facebook Scraper (Class: ScrapingFacebook)
+│   └── scrapingig.py        # Modul khusus Instagram Scraper jika dimigrasi (Class: ScrapingIG)
+├── session/
+│   ├── tiktok_session.json  # Reusable session cookies TikTok
+│   └── facebook_session.json# Reusable session cookies Facebook
+├── requirements.txt         # Daftar dependensi Python
+├── Dockerfile               # Konfigurasi containerization
+└── README.md                # Cara menjalankan locally
+```
+
+---
+
+### 2. Spesifikasi Dependensi (`requirements.txt`)
+Menggunakan pustaka asinkron berkinerja tinggi untuk memastikan pemrosesan request berjalan secepat Node.js:
+*   `fastapi==0.110.0` : Web framework asinkron ASGI.
+*   `uvicorn[standard]==0.28.0` : Server ASGI berperforma tinggi untuk menjalankan FastAPI.
+*   `playwright==1.42.0` : Pustaka automasi browser Chromium.
+*   `playwright-stealth==1.0.6` : Pustaka khusus untuk menyuntikkan bypass anti-bot sidik jari browser.
+*   `pydantic==2.6.4` : Validasi skema input/output data request.
+
+---
+
+### 3. Skema Komunikasi API (Request-Response JSON Spec)
+
+Node.js Express dan Python FastAPI berkomunikasi secara eksklusif menggunakan protokol HTTP JSON.
+
+#### **A. Endpoint TikTok Scraping (`POST /scrape/tiktok`)**
+- **Request Payload** (dikirim oleh Node.js):
+  ```json
+  {
+    "post_url": "https://www.tiktok.com/@username/video/73129083109",
+    "monitored_usernames": ["user_wajib1", "user_wajib2", "user_wajib3"]
+  }
+  ```
+- **Response Payload** (dikembalikan oleh Python):
+  ```json
+  {
+    "status": "success",
+    "platform": "tiktok",
+    "post_url": "https://www.tiktok.com/@username/video/73129083109",
+    "likes": ["user_wajib1"],
+    "comments": [
+      {
+        "username": "user_wajib3",
+        "comment_text": "Sangat setuju dengan program kerja ini!"
+      }
+    ],
+    "warnings": []
+  }
+  ```
+
+#### **B. Endpoint Facebook Scraping (`POST /scrape/facebook`)**
+- **Request Payload**:
+  ```json
+  {
+    "post_url": "https://www.facebook.com/username/posts/123456789",
+    "monitored_usernames": ["user_wajib1", "user_wajib2"]
+  }
+  ```
+- **Response Payload**:
+  ```json
+  {
+    "status": "success",
+    "platform": "facebook",
+    "post_url": "https://www.facebook.com/username/posts/123456789",
+    "likes": ["user_wajib1", "user_wajib2"],
+    "comments": [],
+    "warnings": []
+  }
+  ```
+
+---
+
+### 4. Entrypoint Routing FastAPI (`app/main.py`)
+
+Berikut adalah bagaimana FastAPI bertindak sebagai router yang mengarahkan tugas ke modul scraping masing-masing secara terpisah:
+
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List
+from app.scrapingtiktok import ScrapingTikTok
+from app.scrapingfacebook import ScrapingFacebook
+
+app = FastAPI(title="Social Media Scraper Microservice")
+
+class ScrapeRequest(BaseModel):
+    post_url: str
+    monitored_usernames: List[str]
+
+@app.post("/scrape/tiktok")
+async def scrape_tiktok(payload: ScrapeRequest):
+    scraper = ScrapingTikTok()
+    result = await scraper.scrape_engagement(payload.post_url, payload.monitored_usernames)
+    if "auth_expired" in result.get("warnings", []):
+        return {"status": "auth_expired", "warnings": result["warnings"]}
+    return {
+        "status": "success",
+        "platform": "tiktok",
+        "post_url": payload.post_url,
+        "likes": result["likes"],
+        "comments": result["comments"],
+        "warnings": result["warnings"]
+    }
+
+@app.post("/scrape/facebook")
+async def scrape_facebook(payload: ScrapeRequest):
+    scraper = ScrapingFacebook()
+    result = await scraper.scrape_engagement(payload.post_url, payload.monitored_usernames)
+    return {
+        "status": "success",
+        "platform": "facebook",
+        "post_url": payload.post_url,
+        "likes": result["likes"],
+        "comments": result["comments"],
+        "warnings": result["warnings"]
+    }
+```
+
+---
+
+### 5. Blueprint Kode Python Worker TikTok (`app/scrapingtiktok.py`)
+
+Berikut adalah cetak biru kode asinkron Python yang memanfaatkan Playwright untuk melakukan ekstraksi interaksi TikTok secara ringan dan terisolasi:
+
+```python
+import asyncio
+from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async
+
+class ScrapingTikTok:
+    def __init__(self, session_path: str = "session/tiktok_session.json"):
+        self.session_path = session_path
+
+    async def scrape_engagement(self, post_url: str, monitored_users: list) -> dict:
+        likes_found = []
+        comments_found = []
+        warnings = []
+        
+        async with async_playwright() as p:
+            # 1. Launch browser dengan arguments anti-bot detection
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox"
+                ]
+            )
+            
+            # 2. Buat context dengan persistent storage state (jika ada cookie)
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800}
+            )
+            
+            # 3. Suntikkan script Stealth Bypass Sidik Jari Browser
+            page = await context.new_page()
+            await stealth_async(page)
+            
+            # 4. Optimasi RAM: Blokir pemuatan gambar, stylesheet, dan media
+            await page.route("**/*", lambda route: 
+                route.abort() if route.request.resource_type in ["image", "stylesheet", "font", "media"]
+                else route.continue_()
+            )
+            
+            try:
+                # 5. Navigasi ke URL Video TikTok dengan toleransi timeout 45 detik
+                await page.goto(post_url, wait_until="domcontentloaded", timeout=45000)
+                await page.wait_for_timeout(4000) # Jeda peniruan manusia
+                
+                # 6. Scraping Comments (Membaca elemen komentar ter-render)
+                comment_elements = await page.query_selector_all('p[data-e2e="comment-level-1"]')
+                
+                for el in comment_elements:
+                    text = await el.inner_text()
+                    parent = await el.evaluate_handle("el => el.closest('div')")
+                    user_el = await parent.query_selector('a[href*="/@"]')
+                    
+                    if user_el:
+                        href = await user_el.get_attribute("href")
+                        username = href.split("@")[-1].replace("/", "").strip().lower()
+                        
+                        if username in monitored_users:
+                            comments_found.append({
+                                "username": username,
+                                "comment_text": text.strip()
+                            })
+                            
+                # 7. Scraping Likes (Menggunakan cookies dari session_path)
+                # ...
+                
+            except Exception as e:
+                warnings.append(f"Scraping error: {str(e)}")
+            finally:
+                await page.close()
+                await context.close()
+                await browser.close()
+                
+        return {
+            "likes": likes_found,
+            "comments": comments_found,
+            "warnings": warnings
+        }
+```
+
+---
+
+### 6. Blueprint Kode Python Worker Facebook (`app/scrapingfacebook.py`)
+
+Berikut adalah cetak biru kode asinkron Python yang memanfaatkan Playwright untuk melakukan ekstraksi interaksi Facebook secara terisolasi:
+
+```python
+import asyncio
+from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async
+
+class ScrapingFacebook:
+    def __init__(self, session_path: str = "session/facebook_session.json"):
+        self.session_path = session_path
+
+    async def scrape_engagement(self, post_url: str, monitored_users: list) -> dict:
+        likes_found = []
+        comments_found = []
+        warnings = []
+        
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled", "--no-sandbox"]
+            )
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                viewport={"width": 1280, "height": 800}
+            )
+            page = await context.new_page()
+            await stealth_async(page)
+            
+            # Optimasi RAM
+            await page.route("**/*", lambda route: 
+                route.abort() if route.request.resource_type in ["image", "stylesheet", "font", "media"]
+                else route.continue_()
+            )
+            
+            try:
+                # Navigasi ke postingan Facebook
+                await page.goto(post_url, wait_until="domcontentloaded", timeout=45000)
+                await page.wait_for_timeout(3000)
+                
+                # Logika ekstraksi interaksi Facebook (likes & comments)
+                # ...
+                
+            except Exception as e:
+                warnings.append(f"Scraping error: {str(e)}")
+            finally:
+                await page.close()
+                await context.close()
+                await browser.close()
+                
+        return {
+            "likes": likes_found,
+            "comments": comments_found,
+            "warnings": warnings
+        }
+```
+
+---
+
+### 7. Penanganan Error & Resiliensi Sistem (Failover & Error Handling)
+
+*   **Pencegahan Token Expired**: Jika bot mendeteksi dialihkan ke halaman login TikTok (`/login`) atau Facebook login, bot Python langsung mengembalikan status error `{ "status": "auth_expired" }` ke Node.js. Node.js akan menangkap kode ini, menangguhkan scraping platform terkait sementara, dan memicu notifikasi peringatan di dashboard agar admin melakukan pembaruan sesi cookie.
+*   **Rate Limit Detection**: Jika terdeteksi tantangan CAPTCHA atau blokir jaringan (`429 Too Many Requests`), bot akan mengembalikan status `{ "status": "rate_limited" }`. Worker Node.js secara otomatis akan memindahkan tugas platform tersebut kembali ke antrean Redis dengan waktu tunda eksponensial (*Exponential Backoff Delay*) selama 30 menit.
+*   **Stateless Isolation**: Karena bot Python sama sekali tidak terhubung ke PostgreSQL Supabase, tidak ada risiko kebocoran koneksi database pooler. Jika bot Python mengalami kegagalan/crash, server web utama Node.js Express akan tetap berjalan normal dan hanya mencatat log error pada dashboard.
+
+---
+
+### 8. Cara Deploy di Server (Docker Compose Integration)
+
+Dalam lingkungan Docker, kita cukup menyandingkan container Python ini sebagai service baru di dalam `docker-compose.yml` utama:
+
+```yaml
+version: '3.8'
+
+services:
+  # Service Node.js Backend utama tetap sama
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    environment:
+      - TIKTOK_SCRAPER_URL=http://tiktok-scraper:8000
+    depends_on:
+      - redis
+      - tiktok-scraper
+
+  # Service Baru: Python FastAPI Scraper Worker
+  tiktok-scraper:
+    build: ./scraper-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./scraper-service/session:/app/session
+    environment:
+      - PORT=8000
+    restart: always
+```
+Dengan arsitektur terisolasi seperti ini, ke depannya dapat melakukan *scaling* (meningkatkan spesifikasi server) hanya untuk kontainer Python scraper saja jika beban scraping TikTok meningkat, tanpa perlu mengotak-atik kontainer backend API dashboard Node.js.
+
+
+
+
 

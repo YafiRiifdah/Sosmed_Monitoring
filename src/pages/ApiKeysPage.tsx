@@ -25,6 +25,64 @@ export function ApiKeysPage() {
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
   const apiUsageList = data?.apiUsage ?? [];
+  const roadmapSkeleton = (
+    <div className="pt-4">
+      <div className="mb-4 flex items-center gap-2">
+        <div className="animate-shimmer h-5 w-5 rounded bg-[var(--surface-muted)]" />
+        <div className="animate-shimmer h-6 w-80 max-w-full rounded bg-[var(--surface-muted)]" />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <Card
+            key={index}
+            className="border-[var(--border-soft)] bg-[var(--surface-muted)]"
+          >
+            <div className="flex items-start gap-3">
+              <div className="animate-shimmer h-8 w-8 shrink-0 rounded-lg bg-[var(--surface)]" />
+              <div className="w-full space-y-2">
+                <div className="animate-shimmer h-4 w-40 rounded bg-[var(--surface)]" />
+                <div className="animate-shimmer h-3 w-full rounded bg-[var(--surface)]" />
+                <div className="animate-shimmer h-3 w-5/6 rounded bg-[var(--surface)]" />
+                <div className="animate-shimmer h-3 w-2/3 rounded bg-[var(--surface)]" />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+
+  const apifyPlaceholderSkeleton = (
+    <Card className="relative overflow-hidden border-[var(--border-soft)] bg-[var(--surface-muted)]">
+      <div className="absolute right-3 top-3">
+        <div className="animate-shimmer h-5 w-20 rounded-full bg-[var(--surface)]" />
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="animate-shimmer h-10 w-10 rounded-lg bg-[var(--surface)]" />
+          <div className="space-y-2">
+            <div className="animate-shimmer h-4 w-44 rounded bg-[var(--surface)]" />
+            <div className="animate-shimmer h-3 w-28 rounded bg-[var(--surface)]" />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between gap-3">
+            <div className="animate-shimmer h-3 w-32 rounded bg-[var(--surface)]" />
+            <div className="animate-shimmer h-3 w-36 rounded bg-[var(--surface)]" />
+          </div>
+          <div className="animate-shimmer h-2.5 rounded-full bg-[var(--surface)]" />
+        </div>
+
+        <div className="space-y-2 pt-1">
+          <div className="animate-shimmer h-3 w-full rounded bg-[var(--surface)]" />
+          <div className="animate-shimmer h-3 w-4/5 rounded bg-[var(--surface)]" />
+        </div>
+      </div>
+    </Card>
+  );
 
   async function handleRegisterKey(e: React.FormEvent) {
     e.preventDefault();
@@ -62,31 +120,45 @@ export function ApiKeysPage() {
     <div className="space-y-6 font-sans text-[var(--text-muted)]">
       {/* Header Section */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">API Quota Monitor</h1>
-          <p className="text-sm text-[var(--text-subtle)]">
-            Pantau sisa kuota credit dan masa aktif dari seluruh akun RapidAPI dan Apify secara terpusat.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="ghost"
-            icon={<RefreshCw className={loading ? "animate-spin" : ""} size={16} />}
-            onClick={() => void reload()}
-          >
-            Refresh Quota
-          </Button>
-          <Button
-            icon={<Plus size={16} />}
-            onClick={() => {
-              setFormError(null);
-              setFormSuccess(null);
-              setIsModalOpen(true);
-            }}
-          >
-            Register Key
-          </Button>
-        </div>
+        {loading ? (
+          <div className="space-y-2">
+            <div className="animate-shimmer h-8 w-64 rounded bg-[var(--surface-muted)]" />
+            <div className="animate-shimmer h-4 w-[520px] max-w-full rounded bg-[var(--surface-muted)]" />
+          </div>
+        ) : (
+          <div>
+            <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">API Quota Monitor</h1>
+            <p className="text-sm text-[var(--text-subtle)]">
+              Pantau sisa kuota credit dan masa aktif dari seluruh akun RapidAPI dan Apify secara terpusat.
+            </p>
+          </div>
+        )}
+        {loading ? (
+          <div className="flex flex-wrap gap-2">
+            <div className="animate-shimmer h-10 w-36 rounded-md bg-[var(--surface-muted)]" />
+            <div className="animate-shimmer h-10 w-32 rounded-md bg-[var(--surface-muted)]" />
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="ghost"
+              icon={<RefreshCw className={loading ? "animate-spin" : ""} size={16} />}
+              onClick={() => void reload()}
+            >
+              Refresh Quota
+            </Button>
+            <Button
+              icon={<Plus size={16} />}
+              onClick={() => {
+                setFormError(null);
+                setFormSuccess(null);
+                setIsModalOpen(true);
+              }}
+            >
+              Register Key
+            </Button>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -185,6 +257,7 @@ export function ApiKeysPage() {
         )}
 
         {/* Apify Placeholder Widget */}
+        {loading ? apifyPlaceholderSkeleton : (
         <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] opacity-75 relative overflow-hidden">
           <div className="absolute right-3 top-3">
             <span className="inline-flex items-center rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-xxs font-medium text-[var(--text-subtle)]">
@@ -217,9 +290,11 @@ export function ApiKeysPage() {
             </p>
           </div>
         </Card>
+        )}
       </div>
 
       {/* Multi-Account & Scale Roadmap Tutorial Card */}
+      {loading ? roadmapSkeleton : (
       <div className="pt-4">
         <h2 className="text-lg font-semibold mb-4 text-[var(--text)] flex items-center gap-2 tracking-wide">
           <Sparkles className="text-[var(--warning)]" size={19} />
@@ -270,6 +345,7 @@ export function ApiKeysPage() {
           </Card>
         </div>
       </div>
+      )}
 
       {/* ========================================================================= */}
       {/* GORGEOUS FROSTED GLASS MODAL OVERLAY */}

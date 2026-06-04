@@ -9,6 +9,7 @@ import { OverviewPage } from "./pages/OverviewPage";
 import { PostDetailPage } from "./pages/PostDetailPage";
 import { PostsPage } from "./pages/PostsPage";
 import { RankingPage } from "./pages/RankingPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { api } from "./services/api";
 import type { PostSummary, User } from "./types";
 
@@ -90,10 +91,10 @@ export function App() {
             {page === "ranking" && <RankingPage />}
             {page === "apiUsage" && <ApiKeysPage />}
             {page === "admin" && <AdminManagementPage currentUser={user} />}
+            {page === "settings" && <SettingsPage currentUser={user} onUserUpdate={(updatedUser) => setUser(updatedUser)} />}
           </motion.div>
         )}
       </AnimatePresence>
     </AppLayout>
   );
 }
-

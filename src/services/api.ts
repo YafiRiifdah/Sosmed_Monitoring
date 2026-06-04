@@ -25,6 +25,10 @@ export const api = {
   login: (data: { identifier: string; password: string }) => request<User>("/api/auth/login", { method: "POST", body: json(data) }),
   logout: () => request<void>("/api/auth/logout", { method: "POST" }),
   me: () => request<User>("/api/auth/me"),
+  forgotPassword: (data: { email: string }) => request<{ message: string; devToken?: string }>("/api/auth/forgot-password", { method: "POST", body: json(data) }),
+  resetPassword: (data: any) => request<{ message: string }>("/api/auth/reset-password", { method: "POST", body: json(data) }),
+  changePassword: (data: any) => request<{ message: string }>("/api/auth/change-password", { method: "POST", body: json(data) }),
+  updateProfile: (data: { username: string; email: string }) => request<User>("/api/auth/profile", { method: "PUT", body: json(data) }),
 
   adminListUsers: () => request<User[]>("/api/admin/users"),
   adminCreateUser: (data: any) => request<User>("/api/admin/users", { method: "POST", body: json(data) }),

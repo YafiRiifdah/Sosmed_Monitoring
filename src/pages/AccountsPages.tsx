@@ -1,9 +1,9 @@
-import { AccountManager } from "../components/AccountManager";
+import { SocialAccountPage } from "../components/accounts/SocialAccountPage";
 
 export function TargetAccountsPage() {
-  return <AccountManager title="Target Accounts" kind="target" />;
+  return <SocialAccountPage kind="target" />;
 }
 
 export function MonitoredAccountsPage() {
-  return <AccountManager title="Monitored Accounts" kind="monitored" />;
+  return <SocialAccountPage kind="monitored" />;
 }
