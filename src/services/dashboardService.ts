@@ -1,6 +1,6 @@
 import { EngagementType, PostStatus } from "@prisma/client";
 import { prisma } from "../database/prisma.js";
-import { getApiKeyUsage } from "../utils/apiUsage.js";
+import { getApiKeyUsage, getRotationStats, getAccountsRegistry } from "../utils/apiUsage.js";
 
 export const dashboardService = {
   async getOverview() {
@@ -10,17 +10,27 @@ export const dashboardService = {
       totalMonitoredAccounts,
       completed,
       incomplete,
-      totalStatuses
+      totalStatuses,
+      apiUsage,
+      rotationStats,
+      apiAccounts
     ] = await Promise.all([
       prisma.targetAccount.count({ where: { isActive: true } }),
       prisma.instagramPost.count(),
       prisma.monitoredAccount.count({ where: { isActive: true } }),
       prisma.accountPostStatus.count({ where: { status: PostStatus.COMPLETE } }),
       prisma.accountPostStatus.count({ where: { status: { not: PostStatus.COMPLETE } } }),
-      prisma.accountPostStatus.count()
+      prisma.accountPostStatus.count(),
+      getApiKeyUsage().catch(() => []),
+      getRotationStats().catch(() => ({ rotationCount: 0, history: [] })),
+      getAccountsRegistry().catch(() => [])
     ]);
 
-    const apiUsage = await getApiKeyUsage().catch(() => []);
+    const filteredHistory = rotationStats.history.filter((event: any) => {
+      const isFromInvalid = apiAccounts.some((acc: any) => acc.apiKeyMasked === event.fromKey && acc.status === "invalid");
+      const isToInvalid = apiAccounts.some((acc: any) => acc.apiKeyMasked === event.toKey && acc.status === "invalid");
+      return !isFromInvalid && !isToInvalid;
+    });
 
     return {
       totalTargetAccounts,
@@ -29,7 +39,12 @@ export const dashboardService = {
       totalCompletedEngagement: completed,
       totalIncompleteEngagement: incomplete,
       completionPercentage: totalStatuses === 0 ? 0 : Math.round((completed / totalStatuses) * 100),
-      apiUsage
+      apiUsage,
+      rotationStats: {
+        rotationCount: filteredHistory.length,
+        history: filteredHistory
+      },
+      apiAccounts: apiAccounts.filter((acc: any) => acc.status !== "invalid")
     };
   },
 

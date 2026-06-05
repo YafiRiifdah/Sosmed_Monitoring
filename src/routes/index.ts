@@ -7,7 +7,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { authRouter } from "./authRouter.js";
 import { adminRouter } from "./adminRouter.js";
 import { authenticateUser } from "../middleware/auth.js";
-import { registerNewApiKey } from "../utils/apiUsage.js";
+import { registerNewApiKey, activateApiKey, verifyAndSaveApiKey } from "../utils/apiUsage.js";
 
 export const apiRouter = Router();
 
@@ -34,7 +34,45 @@ apiRouter.post(
       return;
     }
     const result = await registerNewApiKey(provider, accountName, email, apiKey, notes);
-    res.json({ message: "Kunci API berhasil disimpan secara aman!", account: result });
+    res.json({ message: "API KEY berhasil disimpan secara aman!", account: result });
+  })
+);
+
+apiRouter.post(
+  "/accounts/api-keys/activate",
+  asyncHandler(async (req, res) => {
+    const { provider, apiKeyMasked } = req.body;
+    if (!provider || !apiKeyMasked) {
+      res.status(400).json({ message: "Provider dan apiKeyMasked wajib diisi." });
+      return;
+    }
+    if (provider !== "rapidapi" && provider !== "apify") {
+      res.status(400).json({ message: "Provider harus berupa 'rapidapi' atau 'apify'." });
+      return;
+    }
+    const result = await activateApiKey(provider, apiKeyMasked);
+    res.json({ message: "API KEY berhasil diaktifkan secara manual!", account: result });
+  })
+);
+
+apiRouter.post(
+  "/accounts/api-keys/verify",
+  asyncHandler(async (req, res) => {
+    const { provider, apiKeyMasked } = req.body;
+    if (!provider || !apiKeyMasked) {
+      res.status(400).json({ message: "Provider dan apiKeyMasked wajib diisi." });
+      return;
+    }
+    if (provider !== "rapidapi" && provider !== "apify") {
+      res.status(400).json({ message: "Provider harus berupa 'rapidapi' atau 'apify'." });
+      return;
+    }
+    const result = await verifyAndSaveApiKey(provider, apiKeyMasked);
+    if (result.success) {
+      res.json({ message: "API KEY berhasil diverifikasi dan aktif!", result });
+    } else {
+      res.status(400).json({ message: result.message || "Verifikasi API KEY gagal." });
+    }
   })
 );
 

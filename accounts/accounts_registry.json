@@ -16,7 +16,7 @@
     "email": "farm02@example.com",
     "apiKeyMasked": "f724...e0c2",
     "createdAt": "2026-06-01",
-    "status": "inactive",
+    "status": "invalid",
     "notes": "Siap digunakan ketika akun utama habis kuota (Limit Reset: Tanggal 1 setiap bulan)."
   },
   {
@@ -26,7 +26,7 @@
     "email": "yafilala2@gmail.com",
     "apiKeyMasked": "apif...ere1",
     "createdAt": "2026-05-30",
-    "status": "inactive",
+    "status": "invalid",
     "notes": "Akun Apify utama dengan free credit $5.00/bulan untuk fallback tingkat kedua."
   },
   {
@@ -36,7 +36,7 @@
     "email": "farm02@example.com",
     "apiKeyMasked": "apif...ere2",
     "createdAt": "2026-06-01",
-    "status": "inactive",
+    "status": "invalid",
     "notes": "Akun Apify cadangan untuk penanganan load tinggi."
   }
 ]

@@ -24,6 +24,7 @@ services:
     volumes:
       - ./session:/app/session:ro
       - ./debug:/app/debug
+      - ./accounts:/app/accounts
 
   worker:
     build:
@@ -42,6 +43,7 @@ services:
     volumes:
       - ./session:/app/session:ro
       - ./debug:/app/debug
+      - ./accounts:/app/accounts
 
   scheduler:
     build:
