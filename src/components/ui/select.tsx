@@ -21,7 +21,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select o
     <SelectPrimitive.Root value={value} onValueChange={onChange} disabled={disabled}>
       <SelectPrimitive.Trigger
         className={cn(
-          "flex h-11 w-full items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--field-bg)] px-3 text-left text-sm text-[var(--text)] transition-colors duration-150 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] disabled:pointer-events-none disabled:opacity-40 data-[state=open]:border-[var(--accent)] data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-ring)]",
+          "flex h-11 w-full items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--field-bg)] px-3 text-left text-sm text-[var(--text)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] disabled:pointer-events-none disabled:opacity-40 data-[state=open]:border-[var(--accent)] data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-ring)]",
           className
         )}
       >

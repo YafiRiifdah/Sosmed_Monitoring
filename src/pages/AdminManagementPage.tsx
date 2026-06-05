@@ -258,7 +258,7 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                       variants={rowVariants}
                       layout="position"
                       transition={smoothTransition}
-                      className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-center px-4 py-4 md:px-6 md:py-4 bg-[var(--surface)] rounded-xl md:rounded-none border border-[var(--border-soft)] md:border-none hover:bg-[var(--surface-hover)] transition-colors duration-300"
+                      className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-center px-4 py-4 md:px-6 md:py-4 bg-[var(--surface)] rounded-xl md:rounded-none border border-[var(--border-soft)] md:border-none hover:bg-[var(--surface-hover)]"
                     >
                       {/* Col 1: Identity */}
                       <div className="md:col-span-5 flex flex-col justify-center">
@@ -308,7 +308,7 @@ export function AdminManagementPage({ currentUser }: { currentUser: UserType }) 
                           whileHover={!(isSelf || isSuper) ? { scale: 1.08 } : {}}
                           whileTap={!(isSelf || isSuper) ? { scale: 0.95 } : {}}
                           transition={{ type: "tween", duration: 0.15 }}
-                          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border text-[var(--text-muted)] transition-all shadow-sm ${
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border text-[var(--text-muted)] shadow-sm ${
                             isSelf || isSuper 
                               ? "opacity-20 cursor-not-allowed border-transparent bg-transparent" 
                               : "border-[var(--border-soft)] bg-[var(--surface-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] hover:border-[color-mix(in_srgb,var(--danger)_25%,transparent)]"

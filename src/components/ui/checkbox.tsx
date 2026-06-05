@@ -32,7 +32,7 @@ export const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>(
           }}
           disabled={disabled}
           className={cn(
-            "flex h-4 w-4 shrink-0 items-center justify-center rounded border border-[var(--border)] bg-[var(--field-bg)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-ring)] disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-[var(--accent)] data-[state=checked]:bg-[var(--accent-soft)]",
+            "flex h-4 w-4 shrink-0 items-center justify-center rounded border border-[var(--border)] bg-[var(--field-bg)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-ring)] disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-[var(--accent)] data-[state=checked]:bg-[var(--accent-soft)]",
             className
           )}
         >

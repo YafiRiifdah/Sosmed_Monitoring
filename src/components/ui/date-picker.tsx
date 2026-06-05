@@ -45,7 +45,7 @@ export function DatePickerField({ value, onChange, placeholder = "Pilih tanggal"
       onChange={(date) => onChange(date?.toString() ?? "")}
       className={cn("relative w-full", className)}
     >
-      <Group className="relative flex h-11 w-full items-center rounded-lg border border-[var(--border)] bg-[var(--field-bg)] px-3 text-sm text-[var(--text)] transition-colors focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent-ring)]">
+      <Group className="relative flex h-11 w-full items-center rounded-lg border border-[var(--border)] bg-[var(--field-bg)] px-3 text-sm text-[var(--text)] focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent-ring)]">
         <DateInput className="flex min-w-0 flex-1 items-center gap-px">
           {(segment) => (
             <DateSegment
@@ -63,7 +63,7 @@ export function DatePickerField({ value, onChange, placeholder = "Pilih tanggal"
               event.stopPropagation();
               onChange("");
             }}
-            className="ml-2 rounded-md p-1 text-[var(--text-subtle)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+            className="ml-2 rounded-md p-1 text-[var(--text-subtle)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
           >
             <X size={14} />
           </button>
@@ -71,7 +71,7 @@ export function DatePickerField({ value, onChange, placeholder = "Pilih tanggal"
         <AriaButton
           type="button"
           aria-label="Open calendar"
-          className="ml-2 rounded-md p-1 text-[var(--text-subtle)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+          className="ml-2 rounded-md p-1 text-[var(--text-subtle)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
         >
           <CalendarIcon size={17} />
         </AriaButton>
@@ -88,14 +88,14 @@ export function DatePickerField({ value, onChange, placeholder = "Pilih tanggal"
             <header className="mb-3 flex items-center justify-between gap-2">
               <AriaButton
                 slot="previous"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--text-muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
               >
                 <ChevronLeft size={17} />
               </AriaButton>
               <Heading className="text-sm font-semibold text-[var(--text)]" />
               <AriaButton
                 slot="next"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--text-muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
               >
                 <ChevronRight size={17} />
               </AriaButton>
@@ -113,7 +113,7 @@ export function DatePickerField({ value, onChange, placeholder = "Pilih tanggal"
                 {(date) => (
                   <CalendarCell
                     date={date}
-                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-sm text-[var(--text-muted)] outline-none transition hover:bg-[var(--surface-hover)] hover:text-[var(--text)] data-[disabled]:pointer-events-none data-[disabled]:opacity-30 data-[outside-month]:text-[var(--placeholder)] data-[selected]:bg-[var(--accent)] data-[selected]:font-semibold data-[selected]:text-[var(--accent-contrast)] data-[focused]:ring-2 data-[focused]:ring-[var(--accent-ring)]"
+                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-sm text-[var(--text-muted)] outline-none hover:bg-[var(--surface-hover)] hover:text-[var(--text)] data-[disabled]:pointer-events-none data-[disabled]:opacity-30 data-[outside-month]:text-[var(--placeholder)] data-[selected]:bg-[var(--accent)] data-[selected]:font-semibold data-[selected]:text-[var(--accent-contrast)] data-[focused]:ring-2 data-[focused]:ring-[var(--accent-ring)]"
                   />
                 )}
               </CalendarGridBody>

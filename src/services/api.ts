@@ -35,6 +35,10 @@ export const api = {
   adminDeleteUser: (id: string) => request<void>(`/api/admin/users/${id}`, { method: "DELETE" }),
 
   addApiKey: (data: any) => request<any>("/api/accounts/api-keys", { method: "POST", body: json(data) }),
+  activateApiKey: (data: { provider: "rapidapi" | "apify"; apiKeyMasked: string }) =>
+    request<any>("/api/accounts/api-keys/activate", { method: "POST", body: json(data) }),
+  verifyApiKey: (data: { provider: "rapidapi" | "apify"; apiKeyMasked: string }) =>
+    request<any>("/api/accounts/api-keys/verify", { method: "POST", body: json(data) }),
 
   overview: () => request<Overview>("/api/overview"),
   ranking: () => request<RankingRow[]>("/api/ranking"),

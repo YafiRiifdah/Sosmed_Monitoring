@@ -52,7 +52,7 @@ export function AppLayout({
             <ThemeToggle compact />
             <button
               type="button"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-[var(--border-soft)] bg-[var(--surface-muted)] text-[var(--text-subtle)] transition-all hover:bg-[var(--surface-hover)] hover:text-[var(--text)] sm:inline-flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-full border border-[var(--border-soft)] bg-[var(--surface-muted)] text-[var(--text-subtle)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)] sm:inline-flex"
               aria-label="Notifikasi"
             >
               <Bell size={18} />
@@ -60,7 +60,7 @@ export function AppLayout({
             <button
               type="button"
               onClick={() => onPageChange("settings")}
-              className="flex items-center gap-3 rounded-full border border-[var(--border-soft)] bg-[var(--surface)] px-2.5 py-1.5 hover:bg-[var(--surface-hover)] hover:border-[var(--accent-ring)] transition-all text-left focus:outline-none"
+              className="flex items-center gap-3 rounded-full border border-[var(--border-soft)] bg-[var(--surface)] px-2.5 py-1.5 hover:bg-[var(--surface-hover)] hover:border-[var(--accent-ring)] text-left focus:outline-none"
               title="Pengaturan Profil"
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-xs font-extrabold uppercase text-[var(--accent-contrast)]">
@@ -77,7 +77,7 @@ export function AppLayout({
             </button>
             <button
               onClick={onLogout}
-              className="hidden h-9 w-9 items-center justify-center rounded-full border border-[var(--border-soft)] bg-[var(--surface)] text-[var(--text-subtle)] transition-all hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] md:inline-flex"
+              className="hidden h-9 w-9 items-center justify-center rounded-full border border-[var(--border-soft)] bg-[var(--surface)] text-[var(--text-subtle)] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] md:inline-flex"
               title="Keluar Sesi"
             >
               <LogOut size={15} />
@@ -92,11 +92,10 @@ export function AppLayout({
           {visibleItems.map((item) => (
             <button
               key={item.key}
-              className={`flex h-12 w-full items-center gap-3 rounded-xl px-4 text-left text-sm font-bold transition-all duration-200 ${
-                page === item.key 
-                  ? "bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent-ring)]" 
+              className={`flex h-12 w-full items-center gap-3 rounded-xl px-4 text-left text-sm font-bold ${page === item.key
+                  ? "bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent-ring)]"
                   : "text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
-              }`}
+                }`}
               onClick={() => onPageChange(item.key)}
             >
               {item.icon}
@@ -109,7 +108,7 @@ export function AppLayout({
         <div className="absolute bottom-0 left-0 right-0 border-t border-[var(--border-soft)] p-4">
           <button
             onClick={onLogout}
-            className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-muted)] transition-all hover:border-[color-mix(in_srgb,var(--danger)_30%,transparent)] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus:outline-none"
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-muted)] hover:border-[color-mix(in_srgb,var(--danger)_30%,transparent)] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus:outline-none"
           >
             <LogOut size={14} />
             Keluar Sesi
@@ -126,11 +125,10 @@ export function AppLayout({
               {visibleItems.map((item) => (
                 <button
                   key={item.key}
-                  className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium transition-all ${
-                    page === item.key 
-                      ? "bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-ring)]" 
+                  className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium ${page === item.key
+                      ? "bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-ring)]"
                       : "text-[var(--text-subtle)] hover:text-[var(--text)]"
-                  }`}
+                    }`}
                   onClick={() => onPageChange(item.key)}
                 >
                   {item.icon}

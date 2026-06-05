@@ -1,21 +1,21 @@
 import { useCallback, useState } from "react";
-import { Calendar, Key, RefreshCw, Zap, Layers, Server, Shield, Sparkles, Mail, Lock, User, X, Plus } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Key, Lock, Mail, Shield, User } from "lucide-react";
 import { Button } from "../components/Button";
-import { CustomSelect } from "../components/ui/select";
-import { Input } from "../components/ui/input";
+import { ApiKeyOverviewSection } from "../components/apiKeys/ApiKeyOverviewSection";
+import { ApiKeySupportSection } from "../components/apiKeys/ApiKeySupportSection";
 import { Dialog } from "../components/ui/dialog";
-import { Card } from "../components/Card";
-import { Skeleton } from "../components/Skeleton";
+import { Input } from "../components/ui/input";
+import { CustomSelect } from "../components/ui/select";
 import { api } from "../services/api";
 import { useAsync } from "../hooks/useAsync";
+
+type ApiKeyProvider = "rapidapi" | "apify";
 
 export function ApiKeysPage() {
   const { data, loading, error, reload } = useAsync(useCallback(() => api.overview(), []));
 
-  // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [provider, setProvider] = useState<"rapidapi" | "apify">("rapidapi");
+  const [provider, setProvider] = useState<ApiKeyProvider>("rapidapi");
   const [accountName, setAccountName] = useState("");
   const [email, setEmail] = useState("");
   const [apiKey, setApiKey] = useState("");
@@ -23,94 +23,87 @@ export function ApiKeysPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
+  const [activationLoading, setActivationLoading] = useState<string | null>(null);
+  const [verificationLoading, setVerificationLoading] = useState<string | null>(null);
 
   const apiUsageList = data?.apiUsage ?? [];
-  const roadmapSkeleton = (
-    <div className="pt-4">
-      <div className="mb-4 flex items-center gap-2">
-        <div className="animate-shimmer h-5 w-5 rounded bg-[var(--surface-muted)]" />
-        <div className="animate-shimmer h-6 w-80 max-w-full rounded bg-[var(--surface-muted)]" />
-      </div>
+  const apiAccountsList = data?.apiAccounts ?? [];
+  const rotationStats = data?.rotationStats ?? { rotationCount: 0, history: [] };
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <Card
-            key={index}
-            className="border-[var(--border-soft)] bg-[var(--surface-muted)]"
-          >
-            <div className="flex items-start gap-3">
-              <div className="animate-shimmer h-8 w-8 shrink-0 rounded-lg bg-[var(--surface)]" />
-              <div className="w-full space-y-2">
-                <div className="animate-shimmer h-4 w-40 rounded bg-[var(--surface)]" />
-                <div className="animate-shimmer h-3 w-full rounded bg-[var(--surface)]" />
-                <div className="animate-shimmer h-3 w-5/6 rounded bg-[var(--surface)]" />
-                <div className="animate-shimmer h-3 w-2/3 rounded bg-[var(--surface)]" />
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
+  const quotaSummary = apiAccountsList.reduce(
+    (summary: { totalLimit: number; totalRemaining: number }, account: any) => {
+      const usage = apiUsageList.find((item: any) => item.key === account.apiKeyMasked);
+
+      return {
+        totalLimit: summary.totalLimit + (usage?.limit ?? 100),
+        totalRemaining: summary.totalRemaining + (usage?.remaining ?? 100)
+      };
+    },
+    { totalLimit: 0, totalRemaining: 0 }
   );
 
-  const apifyPlaceholderSkeleton = (
-    <Card className="relative overflow-hidden border-[var(--border-soft)] bg-[var(--surface-muted)]">
-      <div className="absolute right-3 top-3">
-        <div className="animate-shimmer h-5 w-20 rounded-full bg-[var(--surface)]" />
-      </div>
+  const totalKeys = apiAccountsList.length;
+  const totalUsed = quotaSummary.totalLimit - quotaSummary.totalRemaining;
+  const overallPct = quotaSummary.totalLimit === 0 ? 0 : Math.round((quotaSummary.totalRemaining / quotaSummary.totalLimit) * 100);
+  const activeKeyAccount = apiAccountsList.find((account: any) => account.status === "active");
+  const activeKeyName = activeKeyAccount ? activeKeyAccount.accountName : "Tidak ada";
 
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="animate-shimmer h-10 w-10 rounded-lg bg-[var(--surface)]" />
-          <div className="space-y-2">
-            <div className="animate-shimmer h-4 w-44 rounded bg-[var(--surface)]" />
-            <div className="animate-shimmer h-3 w-28 rounded bg-[var(--surface)]" />
-          </div>
-        </div>
+  async function handleActivateKey(keyProvider: ApiKeyProvider, apiKeyMasked: string) {
+    setActivationLoading(apiKeyMasked);
+    setFormError(null);
+    setFormSuccess(null);
 
-        <div className="space-y-2">
-          <div className="flex justify-between gap-3">
-            <div className="animate-shimmer h-3 w-32 rounded bg-[var(--surface)]" />
-            <div className="animate-shimmer h-3 w-36 rounded bg-[var(--surface)]" />
-          </div>
-          <div className="animate-shimmer h-2.5 rounded-full bg-[var(--surface)]" />
-        </div>
+    try {
+      await api.activateApiKey({ provider: keyProvider, apiKeyMasked });
+      setFormSuccess(`API KEY ${apiKeyMasked} berhasil diaktifkan secara manual.`);
+      await reload();
+      setTimeout(() => setFormSuccess(null), 1500);
+    } catch (err: any) {
+      setFormError(err.message ?? "Gagal mengaktifkan API KEY.");
+    } finally {
+      setActivationLoading(null);
+    }
+  }
 
-        <div className="space-y-2 pt-1">
-          <div className="animate-shimmer h-3 w-full rounded bg-[var(--surface)]" />
-          <div className="animate-shimmer h-3 w-4/5 rounded bg-[var(--surface)]" />
-        </div>
-      </div>
-    </Card>
-  );
+  async function handleVerifyKey(keyProvider: ApiKeyProvider, apiKeyMasked: string) {
+    setVerificationLoading(apiKeyMasked);
+    setFormError(null);
+    setFormSuccess(null);
 
-  async function handleRegisterKey(e: React.FormEvent) {
-    e.preventDefault();
+    try {
+      const res = await api.verifyApiKey({ provider: keyProvider, apiKeyMasked });
+      setFormSuccess(`API KEY ${apiKeyMasked} berhasil diverifikasi! Sisa kuota: ${res.result.remaining}/${res.result.limit}.`);
+      await reload();
+      setTimeout(() => setFormSuccess(null), 3000);
+    } catch (err: any) {
+      setFormError(err.message ?? "Verifikasi API KEY gagal.");
+      await reload();
+      setTimeout(() => setFormError(null), 3000);
+    } finally {
+      setVerificationLoading(null);
+    }
+  }
+
+  async function handleRegisterKey(event: React.FormEvent) {
+    event.preventDefault();
     setFormError(null);
     setFormSuccess(null);
     setFormLoading(true);
 
     try {
       await api.addApiKey({ provider, accountName, email, apiKey, notes });
-      setFormSuccess(`Kunci API ${provider === "rapidapi" ? "RapidAPI" : "Apify"} berhasil disimpan secara aman!`);
-      
-      // Clear inputs
+      setFormSuccess(`API KEY ${provider === "rapidapi" ? "RapidAPI" : "Apify"} berhasil disimpan secara aman!`);
       setAccountName("");
       setEmail("");
       setApiKey("");
       setNotes("");
-      
-      // Reload quota list
       await reload();
-
-      // Close modal after a short delay so the user sees the success state
       setTimeout(() => {
         setIsModalOpen(false);
         setFormSuccess(null);
       }, 1500);
-
     } catch (err: any) {
-      setFormError(err.message ?? "Gagal menyimpan kunci API.");
+      setFormError(err.message ?? "Gagal menyimpan API KEY.");
     } finally {
       setFormLoading(false);
     }
@@ -118,245 +111,42 @@ export function ApiKeysPage() {
 
   return (
     <div className="space-y-6 font-sans text-[var(--text-muted)]">
-      {/* Header Section */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {loading ? (
-          <div className="space-y-2">
-            <div className="animate-shimmer h-8 w-64 rounded bg-[var(--surface-muted)]" />
-            <div className="animate-shimmer h-4 w-[520px] max-w-full rounded bg-[var(--surface-muted)]" />
-          </div>
-        ) : (
-          <div>
-            <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">API Quota Monitor</h1>
-            <p className="text-sm text-[var(--text-subtle)]">
-              Pantau sisa kuota credit dan masa aktif dari seluruh akun RapidAPI dan Apify secara terpusat.
-            </p>
-          </div>
-        )}
-        {loading ? (
-          <div className="flex flex-wrap gap-2">
-            <div className="animate-shimmer h-10 w-36 rounded-md bg-[var(--surface-muted)]" />
-            <div className="animate-shimmer h-10 w-32 rounded-md bg-[var(--surface-muted)]" />
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="ghost"
-              icon={<RefreshCw className={loading ? "animate-spin" : ""} size={16} />}
-              onClick={() => void reload()}
-            >
-              Refresh Quota
-            </Button>
-            <Button
-              icon={<Plus size={16} />}
-              onClick={() => {
-                setFormError(null);
-                setFormSuccess(null);
-                setIsModalOpen(true);
-              }}
-            >
-              Register Key
-            </Button>
-          </div>
-        )}
-      </div>
+      <ApiKeyOverviewSection
+        activationLoading={activationLoading}
+        activeKeyName={activeKeyName}
+        apiAccountsList={apiAccountsList}
+        apiUsageList={apiUsageList}
+        error={error}
+        formError={formError}
+        formSuccess={formSuccess}
+        isModalOpen={isModalOpen}
+        loading={loading}
+        onActivateKey={(keyProvider, apiKeyMasked) => void handleActivateKey(keyProvider, apiKeyMasked)}
+        onOpenRegisterModal={() => {
+          setFormError(null);
+          setFormSuccess(null);
+          setIsModalOpen(true);
+        }}
+        onRefresh={() => void reload()}
+        onVerifyKey={(keyProvider, apiKeyMasked) => void handleVerifyKey(keyProvider, apiKeyMasked)}
+        overallPct={overallPct}
+        rotationCount={rotationStats.rotationCount}
+        totalKeys={totalKeys}
+        totalLimit={quotaSummary.totalLimit}
+        totalRemaining={quotaSummary.totalRemaining}
+        totalUsed={totalUsed}
+        verificationLoading={verificationLoading}
+      />
 
-      {error && (
-        <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">
-          {error}
-        </div>
-      )}
+      <ApiKeySupportSection loading={loading} rotationStats={rotationStats} />
 
-      {/* Main Quotas Cards Grid */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {loading ? (
-          <Skeleton variant="card" count={2} />
-        ) : apiUsageList.length > 0 ? (
-          apiUsageList.map((usage) => {
-            const pct = usage.limit === 0 ? 0 : Math.round((usage.remaining / usage.limit) * 100);
-            const isExhausted = usage.remaining === 0;
-            const isLow = usage.remaining > 0 && usage.remaining < 20;
-
-            return (
-              <Card key={usage.key} className="relative overflow-hidden border-[var(--border-soft)] hover:border-[var(--accent-ring)] transition-all duration-300">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--accent)]">
-                        <Key size={18} />
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-[var(--text-muted)]">
-                          {usage.key.startsWith("apif") ? "Apify Token" : "RapidAPI Key"}
-                        </div>
-                        <div className="text-xs text-[var(--text-subtle)] font-mono tracking-tight">{usage.key}</div>
-                      </div>
-                    </div>
-                    <div>
-                      {isExhausted ? (
-                        <span className="inline-flex items-center rounded-full bg-[var(--danger-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--danger)] border border-[color-mix(in_srgb,var(--danger)_22%,transparent)]">
-                          Exhausted
-                        </span>
-                      ) : isLow ? (
-                        <span className="inline-flex items-center rounded-full bg-[var(--warning-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--warning)] border border-[color-mix(in_srgb,var(--warning)_22%,transparent)]">
-                          Low Limit
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-[var(--success-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--success)] border border-[color-mix(in_srgb,var(--success)_22%,transparent)]">
-                          Active
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-medium text-[var(--text-subtle)]">
-                      <span>Available Credits</span>
-                      <span className="font-semibold text-[var(--text-muted)]">
-                        {usage.remaining} / {usage.limit} Requests
-                      </span>
-                    </div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-muted)] p-[1px] border border-[var(--border-soft)]">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          isExhausted 
-                            ? "bg-[var(--danger)]" 
-                            : isLow 
-                            ? "bg-[var(--warning)]" 
-                            : "bg-[var(--accent)]"
-                        }`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 pt-3 border-t border-[var(--border-soft)] text-xs text-[var(--text-subtle)]">
-                    {usage.resetAt && (
-                      <div className="flex items-center gap-1.5">
-                        <Calendar size={14} className="text-[var(--text-subtle)]" />
-                        <span>Reset: {new Date(usage.resetAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5">
-                      <Zap size={14} className="text-[var(--text-subtle)]" />
-                      <span>Sync: {new Date(usage.updatedAt).toLocaleTimeString("id-ID")}</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })
-        ) : (
-          <Card className="col-span-2 border-dashed border-[var(--border)] bg-[var(--surface-muted)] py-10 flex flex-col items-center justify-center text-center">
-            <Key size={36} className="text-[var(--text-subtle)] mb-3" />
-            <div className="text-sm font-semibold text-[var(--text-muted)]">Belum Ada Riwayat Penggunaan API</div>
-            <p className="text-xs text-[var(--text-subtle)] max-w-sm mt-1 leading-relaxed">
-              Data pemakaian akan otomatis terekam setelah Anda memicu proses "Fetch" atau "Discover" postingan, atau setelah Anda mendaftarkan Key baru dengan tombol di atas.
-            </p>
-          </Card>
-        )}
-
-        {/* Apify Placeholder Widget */}
-        {loading ? apifyPlaceholderSkeleton : (
-        <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] opacity-75 relative overflow-hidden">
-          <div className="absolute right-3 top-3">
-            <span className="inline-flex items-center rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-xxs font-medium text-[var(--text-subtle)]">
-              Future Plan
-            </span>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--text-subtle)]">
-                <Server size={18} />
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-[var(--text-muted)]">Apify Scraper Integration</div>
-                <div className="text-xs text-[var(--text-subtle)] font-mono">Status: Standby</div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-[var(--text-subtle)]">
-                <span>Estimasi Saldo Kuota</span>
-                <span>$5.00 / $5.00 Free Trial</span>
-              </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-muted)]">
-                <div className="h-full bg-[var(--border)] rounded-full" style={{ width: "100%" }} />
-              </div>
-            </div>
-
-            <p className="text-xs text-[var(--text-subtle)] italic pt-1 leading-relaxed">
-              * Registrasi token Apify melalui tombol di atas akan memicu failover hybrid secara otomatis di masa mendatang.
-            </p>
-          </div>
-        </Card>
-        )}
-      </div>
-
-      {/* Multi-Account & Scale Roadmap Tutorial Card */}
-      {loading ? roadmapSkeleton : (
-      <div className="pt-4">
-        <h2 className="text-lg font-semibold mb-4 text-[var(--text)] flex items-center gap-2 tracking-wide">
-          <Sparkles className="text-[var(--warning)]" size={19} />
-          Panduan Skalabilitas: Ternak Banyak Akun & Rotasi API
-        </h2>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-[var(--accent-ring)] transition-all duration-300">
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--accent)]">
-                <Layers size={16} />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-[var(--text-muted)]">1. Rotasi API Key (RapidAPI)</h3>
-                <p className="text-xs text-[var(--text-subtle)] mt-1.5 leading-relaxed">
-                  Anda dapat mendaftarkan banyak akun gratisan dengan tombol di atas. Backend secara otomatis merekam kredensial aslinya ke dalam file database terenkripsi yang aman dari kebocoran Git.
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-[var(--accent-ring)] transition-all duration-300">
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--accent)]">
-                <Server size={16} />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-[var(--text-muted)]">2. Hybrid Rantai 3-Tingkat</h3>
-                <p className="text-xs text-[var(--text-subtle)] mt-1.5 leading-relaxed">
-                  Gabungkan **RapidAPI** (prioritas utama) + **Apify** (cadangan token gratis) + **Playwright Local** (fallback otomatis gratis selamanya). Menjamin kelancaran scraping tanpa downtime dengan pengeluaran Rp0.
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] hover:border-[color-mix(in_srgb,var(--success)_22%,transparent)] transition-all duration-300">
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--success)]">
-                <Shield size={16} />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-[var(--text-muted)]">3. Dashboard Terkonsolidasi</h3>
-                <p className="text-xs text-[var(--text-subtle)] mt-1.5 leading-relaxed">
-                  Semua kunci baru yang Anda daftarkan di sini langsung terhubung secara real-time ke sistem scraping, mendeteksi status keaktifan kuota sisa tanpa perlu me-restart kontainer sama sekali!
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* GORGEOUS FROSTED GLASS MODAL OVERLAY */}
-      {/* ========================================================================= */}
       <Dialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Daftarkan API Key Baru"
+        title="Daftarkan API KEY Baru"
         icon={<Key size={16} />}
       >
-        <form onSubmit={(e) => void handleRegisterKey(e)} className="space-y-4">
+        <form onSubmit={(event) => void handleRegisterKey(event)} className="space-y-4">
           {formError && (
             <div className="rounded-md border border-[color-mix(in_srgb,var(--danger)_22%,transparent)] bg-[var(--danger-soft)] p-3 text-xs text-[var(--danger)]">
               {formError}
@@ -368,15 +158,14 @@ export function ApiKeysPage() {
               <span>{formSuccess}</span>
             </div>
           )}
-          
-          {/* Provider Select */}
+
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
               Penyedia (Provider)
             </label>
             <CustomSelect
               value={provider}
-              onChange={(val) => setProvider(val as "rapidapi" | "apify")}
+              onChange={(value) => setProvider(value as ApiKeyProvider)}
               options={[
                 { value: "rapidapi", label: "RapidAPI Key" },
                 { value: "apify", label: "Apify Token" }
@@ -386,7 +175,6 @@ export function ApiKeysPage() {
             />
           </div>
 
-          {/* Account Name Input */}
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
               Nama Identitas Akun
@@ -396,12 +184,11 @@ export function ApiKeysPage() {
               required
               placeholder="Contoh: RapidAPI Yafi 03"
               value={accountName}
-              onChange={(e) => setAccountName(e.target.value)}
+              onChange={(event) => setAccountName(event.target.value)}
               icon={<User size={16} />}
             />
           </div>
 
-          {/* Email Input */}
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
               Email Terdaftar Akun
@@ -411,27 +198,25 @@ export function ApiKeysPage() {
               required
               placeholder="email@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(event) => setEmail(event.target.value)}
               icon={<Mail size={16} />}
             />
           </div>
 
-          {/* API Key Input */}
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
-              Kunci API (API Key / Token Rahasia)
+              API KEY (Token Rahasia)
             </label>
             <Input
               type="password"
               required
-              placeholder="Masukkan Kunci API asli"
+              placeholder="Masukkan API KEY asli"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={(event) => setApiKey(event.target.value)}
               icon={<Lock size={16} />}
             />
           </div>
 
-          {/* Notes Input */}
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
               Catatan (Opsional)
@@ -453,7 +238,7 @@ export function ApiKeysPage() {
               Batal
             </button>
             <Button type="submit" disabled={formLoading}>
-              {formLoading ? "Menyimpan..." : "Simpan Kunci"}
+              {formLoading ? "Menyimpan..." : "Simpan API KEY"}
             </Button>
           </div>
         </form>

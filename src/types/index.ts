@@ -25,6 +25,18 @@ export type ApiKeyUsage = {
   updatedAt: string;
 };
 
+export type RotationEvent = {
+  timestamp: string;
+  fromKey: string;
+  toKey: string;
+  reason: string;
+};
+
+export type RotationStats = {
+  rotationCount: number;
+  history: RotationEvent[];
+};
+
 export type Overview = {
   totalTargetAccounts: number;
   totalPosts: number;
@@ -33,6 +45,8 @@ export type Overview = {
   totalIncompleteEngagement: number;
   completionPercentage: number;
   apiUsage?: ApiKeyUsage[];
+  rotationStats?: RotationStats;
+  apiAccounts?: any[];
 };
 
 export type PostSummary = {
