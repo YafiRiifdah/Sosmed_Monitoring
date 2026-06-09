@@ -5,6 +5,7 @@ import { MonitoredAccountsPage, TargetAccountsPage } from "./pages/AccountsPages
 import { ApiKeysPage } from "./pages/ApiKeysPage";
 import { LoginPage } from "./pages/LoginPage";
 import { AdminManagementPage } from "./pages/AdminManagementPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { OverviewPage } from "./pages/OverviewPage";
 import { PostDetailPage } from "./pages/PostDetailPage";
 import { PostsPage } from "./pages/PostsPage";
@@ -85,11 +86,22 @@ export function App() {
             transition={{ type: "spring", stiffness: 350, damping: 28 }}
           >
             {page === "overview" && <OverviewPage />}
-            {page === "targets" && <TargetAccountsPage />}
-            {page === "monitored" && <MonitoredAccountsPage />}
-            {page === "posts" && <PostsPage onOpenPost={setSelectedPost} />}
-            {page === "ranking" && <RankingPage />}
-            {page === "apiUsage" && <ApiKeysPage />}
+            {page === "targetsInstagram" && <TargetAccountsPage platform="instagram" />}
+            {page === "targetsTikTok" && <TargetAccountsPage platform="tiktok" />}
+            {page === "targetsFacebook" && <TargetAccountsPage platform="facebook" />}
+            {page === "monitoredInstagram" && <MonitoredAccountsPage platform="instagram" />}
+            {page === "monitoredTikTok" && <MonitoredAccountsPage platform="tiktok" />}
+            {page === "monitoredFacebook" && <MonitoredAccountsPage platform="facebook" />}
+            {page === "postsInstagram" && <PostsPage platform="instagram" onOpenPost={setSelectedPost} />}
+            {page === "postsTikTok" && <PostsPage platform="tiktok" onOpenPost={setSelectedPost} />}
+            {page === "postsFacebook" && <PostsPage platform="facebook" onOpenPost={setSelectedPost} />}
+            {page === "rankingInstagram" && <RankingPage platform="instagram" />}
+            {page === "rankingTikTok" && <RankingPage platform="tiktok" />}
+            {page === "rankingFacebook" && <RankingPage platform="facebook" />}
+            {page === "apiUsageInstagram" && <ApiKeysPage platform="instagram" />}
+            {page === "apiUsageTikTok" && <ApiKeysPage platform="tiktok" />}
+            {page === "apiUsageFacebook" && <ApiKeysPage platform="facebook" />}
+            {page === "analytics" && <AnalyticsPage />}
             {page === "admin" && <AdminManagementPage currentUser={user} />}
             {page === "settings" && <SettingsPage currentUser={user} onUserUpdate={(updatedUser) => setUser(updatedUser)} />}
           </motion.div>

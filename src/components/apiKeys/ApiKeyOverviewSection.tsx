@@ -88,14 +88,10 @@ export function ApiKeyOverviewSection({
         {loading ? (
           <div className="space-y-2">
             <div className="animate-shimmer h-8 w-64 rounded bg-[var(--surface-muted)]" />
-            <div className="animate-shimmer h-4 w-[520px] max-w-full rounded bg-[var(--surface-muted)]" />
           </div>
         ) : (
           <div>
             <h1 className="text-2xl font-semibold text-[var(--text)] tracking-wide">API Quota Monitor</h1>
-            <p className="text-sm text-[var(--text-subtle)]">
-              Pantau sisa kuota credit dan masa aktif dari seluruh akun RapidAPI dan Apify secara terpusat.
-            </p>
           </div>
         )}
         {loading ? (
@@ -193,6 +189,161 @@ export function ApiKeyOverviewSection({
               </div>
             </Card>
           </>
+        )}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {loading ? (
+          <Skeleton variant="card" count={2} />
+        ) : apiAccountsList.length > 0 ? (
+          apiAccountsList.map((acc: any) => {
+            const usage = apiUsageList.find((u: any) => u.key === acc.apiKeyMasked);
+            const limit = usage?.limit ?? 100;
+            const remaining = usage?.remaining ?? 100;
+            const pct = limit === 0 ? 0 : Math.round((remaining / limit) * 100);
+            const isExhausted = remaining === 0 || acc.status === "exhausted";
+            const isLow = remaining > 0 && remaining < 20;
+            const isActive = acc.status === "active";
+
+            return (
+              <Card key={acc.id} className={`relative overflow-hidden border-[var(--border-soft)] hover:border-[var(--accent-ring)] ${isActive ? "ring-1 ring-[var(--accent-ring)] bg-[var(--surface-strong)]" : ""}`}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-muted)] ${isActive ? "text-[var(--success)]" : "text-[var(--accent)]"}`}>
+                        <Key size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-[var(--text-muted)] flex items-center gap-1.5">
+                          {acc.accountName}
+                          {isActive && <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--success)] animate-pulse" />}
+                        </div>
+                        <div className="text-xs text-[var(--text-subtle)] font-mono tracking-tight">{acc.apiKeyMasked}</div>
+                      </div>
+                    </div>
+                    <div>
+                      {isActive ? (
+                        <span className="inline-flex items-center rounded-full bg-[var(--success-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--success)] border border-[color-mix(in_srgb,var(--success)_22%,transparent)]">
+                          Active
+                        </span>
+                      ) : isExhausted ? (
+                        <span className="inline-flex items-center rounded-full bg-[var(--danger-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--danger)] border border-[color-mix(in_srgb,var(--danger)_22%,transparent)]">
+                          Exhausted
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-[var(--surface-muted)] px-2.5 py-1 text-xs font-semibold text-[var(--text-subtle)] border border-[var(--border-soft)]">
+                          Inactive
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-medium text-[var(--text-subtle)]">
+                      <span>Available Credits</span>
+                      <span className="font-semibold text-[var(--text-muted)]">
+                        {usage ? `${remaining} / ${limit} Requests` : "Belum Digunakan (Sync Pending)"}
+                      </span>
+                    </div>
+                    <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-muted)] p-[1px] border border-[var(--border-soft)]">
+                      <div
+                        className={`h-full rounded-full ${usage ? (isExhausted ? "bg-[var(--danger)]" : isLow ? "bg-[var(--warning)]" : "bg-[var(--accent)]") : "bg-[var(--text-subtle)]"
+                          }`}
+                        style={{ width: usage ? `${pct}%` : "100%" }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 pt-3 border-t border-[var(--border-soft)] text-xs text-[var(--text-subtle)] items-center justify-between">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1">
+                      {usage?.resetAt && (
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={14} className="text-[var(--text-subtle)]" />
+                          <span>Reset: {new Date(usage.resetAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
+                        </div>
+                      )}
+                      {usage?.updatedAt && (
+                        <div className="flex items-center gap-1.5">
+                          <Zap size={14} className="text-[var(--text-subtle)]" />
+                          <span>Sync: {new Date(usage.updatedAt).toLocaleTimeString("id-ID")}</span>
+                        </div>
+                      )}
+                      {!usage && (
+                        <div className="flex items-center gap-1.5 text-[var(--warning)]">
+                          <Zap size={14} />
+                          <span>Sistem akan mensinkronisasi saat scraping dipicu</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        className="text-xs hover:text-[var(--accent)] px-2.5 py-1 h-auto"
+                        disabled={verificationLoading === acc.apiKeyMasked || activationLoading === acc.apiKeyMasked}
+                        onClick={() => onVerifyKey(acc.provider, acc.apiKeyMasked)}
+                      >
+                        {verificationLoading === acc.apiKeyMasked ? "Memverifikasi..." : "Verifikasi"}
+                      </Button>
+                      {!isActive && (
+                        <Button
+                          variant="ghost"
+                          className="text-xs hover:text-[var(--accent)] px-2.5 py-1 h-auto"
+                          disabled={activationLoading === acc.apiKeyMasked || verificationLoading === acc.apiKeyMasked}
+                          onClick={() => onActivateKey(acc.provider, acc.apiKeyMasked)}
+                        >
+                          {activationLoading === acc.apiKeyMasked ? "Mengaktifkan..." : "Aktifkan"}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })
+        ) : (
+          <Card className="col-span-2 border-dashed border-[var(--border)] bg-[var(--surface-muted)] py-10 flex flex-col items-center justify-center text-center">
+            <Key size={36} className="text-[var(--text-subtle)] mb-3" />
+            <div className="text-sm font-semibold text-[var(--text-muted)]">Belum Ada API KEY Terdaftar</div>
+            <p className="text-xs text-[var(--text-subtle)] max-w-sm mt-1 leading-relaxed">
+              Silakan daftarkan API KEY baru menggunakan tombol di atas untuk memulai.
+            </p>
+          </Card>
+        )}
+
+        {loading ? apifyPlaceholderSkeleton : (
+          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] opacity-75 relative overflow-hidden">
+            <div className="absolute right-3 top-3">
+              <span className="inline-flex items-center rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-xxs font-medium text-[var(--text-subtle)]">
+                Future Plan
+              </span>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--text-subtle)]">
+                  <Server size={18} />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-[var(--text-muted)]">Apify Scraper Integration</div>
+                  <div className="text-xs text-[var(--text-subtle)] font-mono">Status: Standby</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-[var(--text-subtle)]">
+                  <span>Estimasi Saldo Kuota</span>
+                  <span>$5.00 / $5.00 Free Trial</span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                  <div className="h-full bg-[var(--border)] rounded-full" style={{ width: "100%" }} />
+                </div>
+              </div>
+
+              <p className="text-xs text-[var(--text-subtle)] italic pt-1 leading-relaxed">
+                * Registrasi token Apify melalui tombol di atas akan memicu failover hybrid secara otomatis di masa mendatang.
+              </p>
+            </div>
+          </Card>
         )}
       </div>
 
@@ -295,162 +446,6 @@ export function ApiKeyOverviewSection({
           </Card>
         </div>
       )}
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {loading ? (
-          <Skeleton variant="card" count={2} />
-        ) : apiAccountsList.length > 0 ? (
-          apiAccountsList.map((acc: any) => {
-            const usage = apiUsageList.find((u: any) => u.key === acc.apiKeyMasked);
-            const limit = usage?.limit ?? 100;
-            const remaining = usage?.remaining ?? 100;
-            const pct = limit === 0 ? 0 : Math.round((remaining / limit) * 100);
-            const isExhausted = remaining === 0 || acc.status === "exhausted";
-            const isLow = remaining > 0 && remaining < 20;
-            const isActive = acc.status === "active";
-
-            return (
-              <Card key={acc.id} className={`relative overflow-hidden border-[var(--border-soft)] hover:border-[var(--accent-ring)] ${isActive ? "ring-1 ring-[var(--accent-ring)] bg-[var(--surface-strong)]" : ""}`}>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-muted)] ${isActive ? "text-[var(--success)]" : "text-[var(--accent)]"}`}>
-                        <Key size={18} />
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-[var(--text-muted)] flex items-center gap-1.5">
-                          {acc.accountName}
-                          {isActive && <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--success)] animate-pulse" />}
-                        </div>
-                        <div className="text-xs text-[var(--text-subtle)] font-mono tracking-tight">{acc.apiKeyMasked}</div>
-                      </div>
-                    </div>
-                    <div>
-                      {isActive ? (
-                        <span className="inline-flex items-center rounded-full bg-[var(--success-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--success)] border border-[color-mix(in_srgb,var(--success)_22%,transparent)]">
-                          Active
-                        </span>
-                      ) : isExhausted ? (
-                        <span className="inline-flex items-center rounded-full bg-[var(--danger-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--danger)] border border-[color-mix(in_srgb,var(--danger)_22%,transparent)]">
-                          Exhausted
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-[var(--surface-muted)] px-2.5 py-1 text-xs font-semibold text-[var(--text-subtle)] border border-[var(--border-soft)]">
-                          Inactive
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-medium text-[var(--text-subtle)]">
-                      <span>Available Credits</span>
-                      <span className="font-semibold text-[var(--text-muted)]">
-                        {usage ? `${remaining} / ${limit} Requests` : "Belum Digunakan (Sync Pending)"}
-                      </span>
-                    </div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-muted)] p-[1px] border border-[var(--border-soft)]">
-                      <div
-                        className={`h-full rounded-full ${
-                          usage ? (isExhausted ? "bg-[var(--danger)]" : isLow ? "bg-[var(--warning)]" : "bg-[var(--accent)]") : "bg-[var(--text-subtle)]"
-                        }`}
-                        style={{ width: usage ? `${pct}%` : "100%" }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 pt-3 border-t border-[var(--border-soft)] text-xs text-[var(--text-subtle)] items-center justify-between">
-                    <div className="flex flex-wrap gap-x-4 gap-y-1">
-                      {usage?.resetAt && (
-                        <div className="flex items-center gap-1.5">
-                          <Calendar size={14} className="text-[var(--text-subtle)]" />
-                          <span>Reset: {new Date(usage.resetAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
-                        </div>
-                      )}
-                      {usage?.updatedAt && (
-                        <div className="flex items-center gap-1.5">
-                          <Zap size={14} className="text-[var(--text-subtle)]" />
-                          <span>Sync: {new Date(usage.updatedAt).toLocaleTimeString("id-ID")}</span>
-                        </div>
-                      )}
-                      {!usage && (
-                        <div className="flex items-center gap-1.5 text-[var(--warning)]">
-                          <Zap size={14} />
-                          <span>Sistem akan mensinkronisasi saat scraping dipicu</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        className="text-xs hover:text-[var(--accent)] px-2.5 py-1 h-auto"
-                        disabled={verificationLoading === acc.apiKeyMasked || activationLoading === acc.apiKeyMasked}
-                        onClick={() => onVerifyKey(acc.provider, acc.apiKeyMasked)}
-                      >
-                        {verificationLoading === acc.apiKeyMasked ? "Memverifikasi..." : "Verifikasi"}
-                      </Button>
-                      {!isActive && (
-                        <Button
-                          variant="ghost"
-                          className="text-xs hover:text-[var(--accent)] px-2.5 py-1 h-auto"
-                          disabled={activationLoading === acc.apiKeyMasked || verificationLoading === acc.apiKeyMasked}
-                          onClick={() => onActivateKey(acc.provider, acc.apiKeyMasked)}
-                        >
-                          {activationLoading === acc.apiKeyMasked ? "Mengaktifkan..." : "Aktifkan"}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })
-        ) : (
-          <Card className="col-span-2 border-dashed border-[var(--border)] bg-[var(--surface-muted)] py-10 flex flex-col items-center justify-center text-center">
-            <Key size={36} className="text-[var(--text-subtle)] mb-3" />
-            <div className="text-sm font-semibold text-[var(--text-muted)]">Belum Ada API KEY Terdaftar</div>
-            <p className="text-xs text-[var(--text-subtle)] max-w-sm mt-1 leading-relaxed">
-              Silakan daftarkan API KEY baru menggunakan tombol di atas untuk memulai.
-            </p>
-          </Card>
-        )}
-
-        {loading ? apifyPlaceholderSkeleton : (
-          <Card className="border-[var(--border-soft)] bg-[var(--surface-muted)] opacity-75 relative overflow-hidden">
-            <div className="absolute right-3 top-3">
-              <span className="inline-flex items-center rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-xxs font-medium text-[var(--text-subtle)]">
-                Future Plan
-              </span>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--text-subtle)]">
-                  <Server size={18} />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-[var(--text-muted)]">Apify Scraper Integration</div>
-                  <div className="text-xs text-[var(--text-subtle)] font-mono">Status: Standby</div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs text-[var(--text-subtle)]">
-                  <span>Estimasi Saldo Kuota</span>
-                  <span>$5.00 / $5.00 Free Trial</span>
-                </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-muted)]">
-                  <div className="h-full bg-[var(--border)] rounded-full" style={{ width: "100%" }} />
-                </div>
-              </div>
-
-              <p className="text-xs text-[var(--text-subtle)] italic pt-1 leading-relaxed">
-                * Registrasi token Apify melalui tombol di atas akan memicu failover hybrid secara otomatis di masa mendatang.
-              </p>
-            </div>
-          </Card>
-        )}
-      </div>
     </>
   );
 }

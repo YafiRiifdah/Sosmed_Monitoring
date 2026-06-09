@@ -1,11 +1,60 @@
-import { Medal } from "lucide-react";
+import { Facebook, Medal, Music2 } from "lucide-react";
 import { useCallback } from "react";
+import type { ReactNode } from "react";
 import { Button } from "../components/Button";
+import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
 import { useAsync } from "../hooks/useAsync";
 import { api } from "../services/api";
 
-export function RankingPage() {
+export type RankingPlatform = "instagram" | "tiktok" | "facebook";
+
+const rankingPlatformCopy: Record<
+  Exclude<RankingPlatform, "instagram">,
+  { icon: ReactNode; title: string; description: string }
+> = {
+  tiktok: {
+    icon: <Music2 size={18} />,
+    title: "Ranking TikTok",
+    description: "Halaman ranking TikTok sudah disiapkan. Data akan ditampilkan setelah backend dan API TikTok tersedia.",
+  },
+  facebook: {
+    icon: <Facebook size={18} />,
+    title: "Ranking Facebook",
+    description: "Halaman ranking Facebook sudah disiapkan. Data akan ditampilkan setelah backend dan API Facebook tersedia.",
+  },
+};
+
+export function RankingPage({ platform = "instagram" }: { platform?: RankingPlatform }) {
+  if (platform !== "instagram") {
+    return <RankingPlaceholder platform={platform} />;
+  }
+
+  return <InstagramRankingContent />;
+}
+
+function RankingPlaceholder({ platform }: { platform: Exclude<RankingPlatform, "instagram"> }) {
+  const copy = rankingPlatformCopy[platform];
+
+  return (
+    <div className="space-y-5 text-[var(--text-muted)]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface-muted)] text-[var(--accent)] ring-1 ring-[var(--border-soft)]">
+            {copy.icon}
+          </span>
+          <h1 className="text-2xl font-semibold tracking-wide text-[var(--text)]">{copy.title}</h1>
+        </div>
+      </div>
+
+      <Card className="p-0">
+        <EmptyState message={copy.description} />
+      </Card>
+    </div>
+  );
+}
+
+function InstagramRankingContent() {
   const { data, loading, error, reload } = useAsync(useCallback(() => api.ranking(), []));
   const rankingTableSkeleton = (
     <div className="overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--surface)]">
