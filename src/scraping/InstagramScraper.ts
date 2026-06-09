@@ -70,7 +70,7 @@ export class InstagramScraper {
         "--disable-setuid-sandbox"
       ]
     });
-    
+
     this.context = await this.browser.newContext({
       storageState: env.INSTAGRAM_STORAGE_STATE,
       userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -79,7 +79,7 @@ export class InstagramScraper {
       locale: "en-US",
       timezoneId: "Asia/Jakarta"
     });
-    
+
     await this.applyStealthToContext(this.context);
 
     const page = await this.context.newPage();
@@ -269,7 +269,7 @@ export class InstagramScraper {
       if (dialogOpened) {
         const dialogLocator = page.locator('div[role="dialog"]:not(:has(article))').last();
         await this.scrollDialog(dialogLocator, this.maxModalScrolls).catch(() => undefined);
-        
+
         const capturedFromModal = capture.getLikeUsernames();
         if (capturedFromModal.length > 0) {
           return { usernames: this.uniqueUsernames(capturedFromModal), unavailable: false };
@@ -831,12 +831,12 @@ export class InstagramScraper {
       try {
         const profileUrl = `https://www.instagram.com/${targetUsername}/`;
         await page.goto(profileUrl, { waitUntil: "networkidle", timeout: 45000 });
-        
+
         // Wait for post link in the profile grid to be visible
         const postLink = page.locator(`a[href*="${postId}"]`).first();
         await postLink.waitFor({ state: "visible", timeout: 10000 }).catch(() => undefined);
         const linkVisible = await postLink.isVisible().catch(() => false);
-        
+
         if (linkVisible) {
           await postLink.click();
           // Wait for URL to change to the post
